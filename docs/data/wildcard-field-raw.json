@@ -1,0 +1,1047 @@
+{
+"wildcard_aug": {
+"total": 802,
+"maxPage": 41,
+"fetched": 13,
+"projects": [
+{
+"id": "6a855e4c83ceb813d02d782d",
+"title": "RESONANCE",
+"desc": "AI that turns organizational history into intelligence to recognize patterns before they repeat.",
+"tags": [
+"Wildcard Challenge (August)"
+]
+},
+{
+"id": "6a8542706efa0770ec0294ed",
+"title": "\u200bSmart Trade AI Pro",
+"desc": "An AI trading assistant built with IBM Bob to analyze chart patterns and manage trade risks.",
+"tags": [
+"Wildcard Challenge (August)"
+]
+},
+{
+"id": "6a84b386a9318fcbf50f7db9",
+"title": "AstroMind AI-Powered Deep Space Mission Planner",
+"desc": "built with IBM Bob, powered by IBM watsonx Granite. Generate mission profiles, risk matrices",
+"tags": [
+"August Space Exploration Challenge",
+"Wildcard Challenge (August)"
+]
+},
+{
+"id": "6a835e54a9318fcbf50eeaf6",
+"title": "MetaForge",
+"desc": "MetaForge turns rough AI-worker ideas into scoped, testable, exportable system prompts.",
+"tags": [
+"Wildcard Challenge (August)"
+]
+},
+{
+"id": "6a822500c4dba3c6223ea46f",
+"title": "CineMatch",
+"desc": " AI can turn a creative film idea into structured development intelligence",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)",
+"Wildcard Challenge (August)"
+]
+},
+{
+"id": "6a7f35f583ceb813d02acbe2",
+"title": "CausewayAI",
+"desc": "CausewayAI: Automated Smart-Border Clearance System",
+"tags": [
+"Wildcard Challenge (August)"
+]
+},
+{
+"id": "6a7de227ebef49c4174508d1",
+"title": "Corpus",
+"desc": "CORPUS helps teams find answers across multiple documents with reliable source citations..",
+"tags": [
+"Wildcard Challenge (August)"
+]
+},
+{
+"id": "6a760c335f8a9558a9ef4439",
+"title": "SpaceLens AI",
+"desc": "An AI-Powered Satellite Image Analysis Using Deep Learning & IBM watsonx.ai",
+"tags": [
+"August Space Exploration Challenge",
+"Wildcard Challenge (August)"
+]
+},
+{
+"id": "6a74d4ce64972e234674e86e",
+"title": "BioFelid-AI",
+"desc": "Conservation genomics platform integrating NCBI, UniProt and Ensembl.",
+"tags": [
+"Wildcard Challenge (August)"
+]
+},
+{
+"id": "6a7238086ac070612d1381bc",
+"title": "MergeMasterAI",
+"desc": "An autonomous AI co-worker that orchestrates GitHub PR workflows.",
+"tags": [
+"Wildcard Challenge (August)"
+]
+},
+{
+"id": "6a719134c11342b293da2928",
+"title": "Intently (Conversational Precision by Design)",
+"desc": "Intently project is a two-layer conversation pattern innovation on multi-agent architecture design.",
+"tags": [
+"Wildcard Challenge (August)"
+]
+},
+{
+"id": "6a6c7d73c7d0caeb9a1df59d",
+"title": "Stellar Insight Labs",
+"desc": "Turning NASA starlight into discovery via interpretable deep learning.",
+"tags": [
+"August Space Exploration Challenge",
+"Wildcard Challenge (August)"
+]
+},
+{
+"id": "6a625bbf05a952021382d8ff",
+"title": "DscienTia",
+"desc": "AI-assisted platform turning community reports into structured risk insights and actions.",
+"tags": [
+"Wildcard Challenge (August)"
+]
+}
+]
+},
+"space_aug": {
+"total": 802,
+"maxPage": 41,
+"fetched": 32,
+"projects": [
+{
+"id": "6a8c2eae7f1b39e6c33ece38",
+"title": "EchoLock AI",
+"desc": "Arrival-time safety escrow for delayed spacecraft commands, with verified intent-preserving patches.",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a8c0705749c9c91d5694a23",
+"title": "AeroGuard AI",
+"desc": "Dual ML detects telemetry faults in real time; IBM Bob AI diagnoses & outputs actionable fixes.",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a8ab507498251c254c28e15",
+"title": "Dalang.AI - Wayang Content Adaptation Assistant",
+"desc": "AI tool that helps young dalang adapt wayang stories into modern digital content formats.",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a89b120b4d722a5d493ba75",
+"title": "MissionInsights AI",
+"desc": "AI copilot for spacecraft telemetry, anomaly detection, mission health, and intelligent decision.",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a88d72d498251c254c049a3",
+"title": "MissionShield AI",
+"desc": "AI-powered space weather risk analysis using NASA, NOAA & IBM Granite for mission planning.",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a8842b938a123bf4c10e885",
+"title": "OrbitalGuard",
+"desc": "OGB (OrbitalGuard) is an AI-powered Space Situational Awareness (SSA) platform",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a86881ac7a97f8f932e4ced",
+"title": "SkyWatch-AQ",
+"desc": "Satellite-based air quality health alerts for cities without ground monitors powered by NASA data/ML",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a85d07e84675bc2566800a6",
+"title": "Space Weather Launch Prediction System",
+"desc": "An AI space weather risk classifier and Go/No-Go launch safety dashboard built with IBM Bob.",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a85bcdb84675bc25667bef5",
+"title": "Kessler Aegis",
+"desc": "An AI-powered Space Situational Awareness terminal using IBM watsonx to prevent orbital collisions.",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a85aafe83ceb813d02dcbe1",
+"title": "AstroNode AI",
+"desc": "AstroNode AI empowers everyone to explore NASA and ESA data.",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a84b386a9318fcbf50f7db9",
+"title": "AstroMind AI-Powered Deep Space Mission Planner",
+"desc": "built with IBM Bob, powered by IBM watsonx Granite. Generate mission profiles, risk matrices",
+"tags": [
+"August Space Exploration Challenge",
+"Wildcard Challenge (August)"
+]
+},
+{
+"id": "6a84205d83ceb813d02cdd2d",
+"title": "OrbitGuard-AI",
+"desc": "OrbitGuard AI is a self-hostable Space Situational Awareness platform for regional space agencies. ",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a839052d974ca83fd01073f",
+"title": "ExoStrand",
+"desc": "From NASA data to autonomous action - IBM Granite intelligence for protecting astronauts.",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a831b4cd974ca83fd00e8e4",
+"title": "Vigil Station - Mission Planning Assistant",
+"desc": "A satellite operations planning system calculates contact windows between satellite & ground station",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a8235fb440dd01b846c139d",
+"title": "SkySafe-AI",
+"desc": "Space weather impact, translated for you \u2014 wherever you are.",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a815e6d440dd01b846b7762",
+"title": "ImpactIQ",
+"desc": "Live asteroid impact risk intelligence powered by NASA JPL physics and IBM Granite AI.\n",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a80ca726822177b4f235b65",
+"title": "Aetheris",
+"desc": "Aetheris is a Rust\u2011powered spacecraft telemetry anomaly detection platform engineered for speed.",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a8034a8440dd01b846abfae",
+"title": "EarthOspacE",
+"desc": "EarthOspacE: AI-powered real-time space intelligence for astronauts.",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a7b8c21c7a97f8f9325667b",
+"title": "Satellite Insights",
+"desc": "Turn live satellite data into plain-English, mission-ready situation briefs \u2014 powered by IBM Granite",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a79e0af77a0da1c6363bf7b",
+"title": "AstroPilot AI",
+"desc": "AstroPilot AI helps mission planners, students, and civic innovators converse with mission knowledge",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a797b206b782a6e2bc516cc",
+"title": "ClearOrbit",
+"desc": "AI-powered satellite collision risk reports from public data, in seconds.",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a7946de3ca53b759dc97346",
+"title": "COSMOS-5H1",
+"desc": "AI-powered space exploration platform for discovering planets, missions, physics, and cosmic insight",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a77893ff6bacb63b423bd3e",
+"title": "Orbital Risk Triage Agent \u2014 Open Conjunction Checks",
+"desc": "Real-time debris collision risk detection using live orbital data, AI-generated ops briefs.",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a76f08f5f8a9558a9efbaeb",
+"title": "Cosmoguide:AI Framework for Complex Operations",
+"desc": "Cosmoguide is an advanged ai driven framework engineered to monitor and analyze.",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a760c335f8a9558a9ef4439",
+"title": "SpaceLens AI",
+"desc": "An AI-Powered Satellite Image Analysis Using Deep Learning & IBM watsonx.ai",
+"tags": [
+"August Space Exploration Challenge",
+"Wildcard Challenge (August)"
+]
+},
+{
+"id": "6a75860cd271cfc56cc137be",
+"title": "Space Weather & Launch Risk Dashboard",
+"desc": "Built an end-to-end Machine Learning pipeline using RandomForest Classifier (97% accuracy) ",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a74885f48e06c8320d0cb10",
+"title": "AstraTwin AI",
+"desc": "AstraTwin AI: Your spacecraft's digital twin that predicts failures before they happen.",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a7487538f2af77fd9f1cafc",
+"title": "Aura",
+"desc": "Aura, AI-powered space weather intelligence platform.",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a71f97dc11342b293da3294",
+"title": "OrbitInsight AI",
+"desc": "An AI platform translating space weather and telemetry data into actionable mission insights.",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a6c7d73c7d0caeb9a1df59d",
+"title": "Stellar Insight Labs",
+"desc": "Turning NASA starlight into discovery via interpretable deep learning.",
+"tags": [
+"August Space Exploration Challenge",
+"Wildcard Challenge (August)"
+]
+},
+{
+"id": "6a5c948c8293989903b9609d",
+"title": "LookUp",
+"desc": "Level up astrophotography settings and spots for any skill level using real-time environment data.",
+"tags": [
+"August Space Exploration Challenge"
+]
+},
+{
+"id": "6a5900d056d2a82c101399b4",
+"title": "MissionGuard AI",
+"desc": "AI-powered spacecraft monitoring that detects anomalies and explains mission risks in real time",
+"tags": [
+"August Space Exploration Challenge"
+]
+}
+]
+},
+"wildcard_jul": {
+"total": 802,
+"maxPage": 41,
+"fetched": 79,
+"projects": [
+{
+"id": "6a822500c4dba3c6223ea46f",
+"title": "CineMatch",
+"desc": " AI can turn a creative film idea into structured development intelligence",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)",
+"Wildcard Challenge (August)"
+]
+},
+{
+"id": "6a6d5c386258a9d680db578a",
+"title": "Cascade Intelligence",
+"desc": "Cascade Intelligence is an enterprise-ready executive decision intelligence platform",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6d48a5be1a832899e9d92e",
+"title": "Corn Ethanol Arb Dashboard",
+"desc": "Our project is an AI-powered decision-support dashboard for corn ethanol crush margins.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6d18a72649cc2245a7858a",
+"title": "aInamnesis: Medical Documentation Transformator",
+"desc": "An offline-first AI tool empowering patients to structure, digitize, and standardize health records.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6d0bdb7f81c40458f50afc",
+"title": "Mandate",
+"desc": "A policy-to-permission control plane for AI agents. Autonomy is earned, never assumed.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6cfc7a993b32be7427b192",
+"title": "Context Guard",
+"desc": "ContextGuard is a deep-work focus shield for knowledge workers. You tell it what you're working on; ",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6cdb3d503cedd0d91a73dc",
+"title": "AutoSage \u2013 AI-Powered Intelligent Vehicle Decision Assistant",
+"desc": "AutoSage is an AI-powered multimodal vehicle decision support system ",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6cd2a9e217fea7b6222516",
+"title": "AI-Smart-Price-Tracker-Shopping-Decision-Assistant",
+"desc": "AI Smart Price Tracker Shopping Decision Assistant is an AI-powered web application that helps users",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6ccedb4ecdcb818c66131d",
+"title": "AURA AI",
+"desc": "AURA AI",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6cbc1fc93b9e02f2b31b7e",
+"title": "digital habit scoring ",
+"desc": "This application provides an accessible web-based platform for quick user self-assessments. Users in",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6cae11c1f376169d286043",
+"title": "Luminary AI Kreator",
+"desc": "Platform AI all-in-one untuk kreator konten. Luminary menggabungkan asisten konten, alat storytellin",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6c9f926948e26855ad93da",
+"title": "SignBridge AI",
+"desc": "Bridge communication with AI-powered sign language detection and interactive learning.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6c9ba09770e475472068fa",
+"title": "FinPilot AI \u2013 Enterprise Multi-Agent Finance Platform",
+"desc": "Enterprise multi-agent AI platform for intelligent invoice processing using OCR, RAG and LLMs.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6c777438b99f0966a981b6",
+"title": "FocusForge AI",
+"desc": "AI study partner that plans, tracks & motivates students to never fall off track. Built with IBM Bob",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6c722fe217fea7b621ce7a",
+"title": "Opsmith",
+"desc": "Turn messy spreadsheets into working internal tools with AI.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6c5d72c7d0caeb9a1de4bc",
+"title": "Mosaic Campaign Studio ",
+"desc": "Mosaic turns one validated brief into three governed bilingual campaign directions for Saudi teams.",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6c39e5c93b9e02f2b29f99",
+"title": "AIVA",
+"desc": "AIVA (AI Voice Agent Assistant) is an AI-powered voice sales and customer support platform designed ",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6c0111232192604bb33a66",
+"title": "OptiHub3",
+"desc": "OptiHub3 simplifies text-to-speech, audio-video sync, and compression with fast, private processing.",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6bd8cb5de052489b03c9ed",
+"title": "TeamPilot AI \u2014 Team Coordination Assistant",
+"desc": "AI-powered assistant that detects team overload and project risk before they become crises.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6bb09938b99f0966a8daeb",
+"title": "AI Mentor for IELTS",
+"desc": "Personal AI English teacher with memory: it tracks your mistakes and fixes them for good.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6ba57ac93b9e02f2b23589",
+"title": "\u200bManomitra - AI Mental Health Companion",
+"desc": "\u200bManomitra by Daniel (M.A. Psych): AI mental health app with anonymous audio sessions,IBM Bob & UPI",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6ba2a4729018df418e891e",
+"title": "RoundTable",
+"desc": "AI advisory panel of 5 expert personas stress-tests founder ideas before they waste months building",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6b95dabbb520f38aa903da",
+"title": "CodeGhost AI",
+"desc": "CodeGhost AI is an automated digital offboarding assistant engineered on the IBM Bob framework.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6b8630e217fea7b621394d",
+"title": "AI Student Room Finder",
+"desc": "AI Student Room Finder is an intelligent web-based platform designed to help students find safe, aff",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6b667f6948e26855a94cc0",
+"title": "Netwroxia - Predictive AI for Banking Networks",
+"desc": "Air-gapped AI copilot that predicts banking network failures before impact.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6b549e7f81c40458f458d4",
+"title": "AI ICF Copilot",
+"desc": "AI ICF Copilot is an explainable AI decision intelligence platform designed to help people better un",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6af27438b99f0966a8aced",
+"title": "Career Plot-AI",
+"desc": "CareerPlot AI: AI-powered resume analysis, ATS scoring, job matching, and smart career guidance.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6a2dd7a2a54a5ab2cb8f3b",
+"title": "AncoraAI",
+"desc": "AI meeting agent turning recordings into searchable cross-meeting knowledge.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a685e5952ad1e2ffef10219",
+"title": "Beef",
+"desc": "Finds pairs of open pull requests that pass every check alone but break each other when merged.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a684da82aad9b9f2c0e0db8",
+"title": "AdaptLearn",
+"desc": "Adpatlearn is a locally orchestrated AI system that transforms text into synchronized multimedia.",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a67a08e42690aacb0753b62",
+"title": "Astartis-Powered by IBM Granite 4",
+"desc": "Fully offline AI ASSISTED SOC: 77 AI agents on local IBM Granite models triage, act, and audit.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6751d9855f37d82ce730ea",
+"title": "Bomon Development Foundation \u2014 AI-Powered Charity & Scholars",
+"desc": "AI-powered nonprofit platform for scholarships, donations, volunteering and community impact.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a674f44127ca950b82ca928",
+"title": "FinSense AI: AI-Powered Financial Planning and Expense Intel",
+"desc": "AI-powered finance advisor that answers real money questions from your transaction data.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6709f23a076938f65580ed",
+"title": "MeshNet-AI",
+"desc": "MeshNet AI is a decentralized, offline mesh network AI to route SOS during disasters",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a66c8c207fa01f93a900751",
+"title": "ARL:Autonomous Record Label",
+"desc": "ARL (Autonomous Record Label) is a multi-agent OS acting as a 24/7 virtual label staff.",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6608270853d729c4a919f4",
+"title": "Shadow Ops",
+"desc": "AI preflight platform that finds hidden work, measures AI Tax, and designs safer workflows.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a65ed3374ecc0b0d5e18a04",
+"title": "Devflow Studio",
+"desc": "Visual DevOps platform for generating secure, production-ready infrastructure as code",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a64a490feb0405ce94425ac",
+"title": "vane-guard-orchestrator ",
+"desc": "Enterprise-grade Truth-AI Diagnostic Architecture powered by the Vane-Guard Sovereign Framework v1.0",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6461078583e59b8fdd3c7a",
+"title": "Trace: Enterprise AI Underwriter",
+"desc": "TRACE is a compliance-first AI underwriter using IBM watsonx to cut 3-week claim backlogs to 3 mins.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a643063ffe53d5e059be567",
+"title": "CreatorCareer AI",
+"desc": "CreatorCareer AI helps creators turn content and audience insights into ethical business plans.",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a640b7cc60ad6cff6085095",
+"title": "Nexus AI: Career Readiness Coach for College Students",
+"desc": "AI career readiness workspace for tracking internship prep, skill gaps, and weekly next steps.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a63f567804ae813fee6d53e",
+"title": "OpsFlow",
+"desc": "OpsFlow AI is an autonomous incident orchestrator ",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a63a7c2aef7a1dab81adfee",
+"title": "DataMine AI",
+"desc": "Retrieve & Transform the Data into Structural & Actionable AI training Data for SLMs in Real-Time.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a639d0818321095868bccca",
+"title": "Electro-AI",
+"desc": "Electro-AI is an AI assitant to help electricians with administrative/not revenue generating tasks",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a62147e8583e59b8fdc837e",
+"title": "Acad-Nav",
+"desc": "AI-driven career co-pilot revealing hidden opportunities & roadmaps for students.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a6136a13de3bc622c7f9032",
+"title": "1. July Challenge - Reimagine Creative Industries with AI ",
+"desc": " Coffee Shop, Game, DJ Application, Build Intelligent Systems & Soccer pitch With\nIBM.BOB.\n\n",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a60ab26da23b243b6786ae7",
+"title": "BrandForge AI",
+"desc": "Automated creative co-pilot powered by IBM Granite that transforms simple business briefs into multi",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a602d67ad272cbd7904c5e7",
+"title": "Catalyst Integrity Desk",
+"desc": "An auditable monitor for when a biotech thesis no longer matches its approved evidence contract.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a5fac74a7f13cd4e76122be",
+"title": "Cadence: An AI Chief of Staff",
+"desc": "AI Chief of Staff that turns meeting decisions into tracked, closed-out commitments.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a5f8ccb870c4bc0bc18a196",
+"title": "Project Naur",
+"desc": "An MCP-driven ontological linter using Bob to enforce a shared mental model before teams code.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a5f75ef6dd01f551ddaf942",
+"title": "MindCare AI X",
+"desc": "AI-powered mental wellness platform with IBM watsonx and smart coaching",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a5ef09542f48fac3f37d22b",
+"title": "AI Nonprofit Document Assistant",
+"desc": "AI-powered Streamlit app that generates nonprofit documents and provides intelligent document search",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a5e55646ab2d85dd1e6a37b",
+"title": "Ozybase: The AI-Powered Single-Binary BaaS",
+"desc": "An open-source BaaS in a single binary. It uses AI to accelerate and simplify backend development.",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a5e51b8c56bcaca154fb692",
+"title": "Decision Assurance Layer for AI-Assisted Cybersecurity",
+"desc": "AI-assisted cyber decisions with human oversight, rationale, and tamper-evident audit records.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a5cf38e12d2487882b015fb",
+"title": "AI Student Digital Twin for Intelligent Academic Planning",
+"desc": "AI-powered Student Digital Twin for personalized academic and career guidance.",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a5cf10e84e0636efcf77711",
+"title": "MechaCode Guardian: AI Maintenance Co-worker",
+"desc": "Evidence-grounded AI co-worker for safe, fast mechatronics troubleshooting and maintenance.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a5b292d6f5aa392f4fd4b22",
+"title": "MathCraft",
+"desc": "\"MathCraftisapremium\n,distraction-freemathematicsplatformthattransforms complex theories into \nintui",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a5a15bf8e3c1e2c9131b628",
+"title": "Chronos",
+"desc": "Chronos is a multi-agent orchestrator built on IBM Bob",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a589ed6d76971a95e962ae7",
+"title": "SENTRY AI",
+"desc": "Verifying every AI action before it reaches the real world.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a57e349f03d8eacc03b98d4",
+"title": "TransCreate",
+"desc": "Film scripts shouldn't just be translated\u2014TransCreate rewrites them to feel truly native.",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a57193e3b0c58bf9bdadad0",
+"title": "Atlas",
+"desc": "Turn company data into AI agent powered decisions utilizing a living knowledge graph for retrieval",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a5649e1761379dc6554c9d5",
+"title": "APROKO TECHNOLOGY",
+"desc": "Secure online Voting for 18+ voters with easy registration,verification,voting and accurate result",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a54d42491da92cd88687740",
+"title": "VoxDesk: AI-Powered Task & Resource Orchestration",
+"desc": "An AI-powered smart dispatcher optimizing operations, workflows, and task orchestration.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a5101816f3ed569de0459ec",
+"title": "Training Management System with IBM Bob AI",
+"desc": "Enterprise training platform for courses, trainers, learners & scheduling built with IBM Bob AI.",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a4dede5a0b57013f4909fe9",
+"title": "AI-Powered Supply Chain Optimization Platform",
+"desc": "AI platform for forecasting demand, managing inventory, and optimizing supply-chain operations.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a4dbc01a22f16d05a979693",
+"title": "Imagine - A creative interface for intelligence.",
+"desc": "Voice-first canvas where spoken ideas become persistent objects with memory and behavior.",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a4d1134a22f16d05a978259",
+"title": "AI Coworker",
+"desc": "A simple AI coworker to help you generate, prioritize, and analyse as you need.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a4c4b65afd2c887de64df0c",
+"title": "DJWell - Smart DJ & Student Wellness Platform",
+"desc": "DJWell - Where AI meets music, health, and student success.\n",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a4c005bbd9e3016f9c3d240",
+"title": "Opportunity Navigator AI",
+"desc": "Opportunity Navigator AI is an intelligent document-to-action platform designed to simplify complex ",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a4b569d40146e8f044d2d2a",
+"title": "MindMesh",
+"desc": "Real-time AI turns raw team chat into a live, traceable mind map for effortless ideation.",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a4a64386f8c0fb2ad6e5b7b",
+"title": "NexusFlow",
+"desc": "Autonomous Decision Intelligence \u2014 from 11 days to 5 minutes",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a4a14c5b8500a129890f873",
+"title": "SMART INDUSTRIAL CONTROL SYSTEM & SCADA SIMULATOR (GCT)",
+"desc": "GCT-SCADA Simulator: A realistic industrial control system for smart monitoring and automation.\n",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a4871ec8e24a5cb9a6db5ea",
+"title": "Faro Outreach Analytics",
+"desc": "Turn student power into AI-powered outreach that preserves student organizational knowledge.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a482a33d3478b7319e85417",
+"title": "Edict Work Mode",
+"desc": "AI-assisted work opportunity screener for safer, faster next-action decisions.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a479dbe9ad922a3479003cb",
+"title": "SentinelMind",
+"desc": "AI security co-pilot that detects threats, scores risk & explains findings in plain English.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a4737b2e3ae3a6fd45b9759",
+"title": "ClearPath AI",
+"desc": "ClearPath AI is a document-to-action command center for students, newcomers, immigrants, workers, an",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a465a0716a846e0fe24751d",
+"title": " BenchPilot \u2014 question to experiment in an hour, not weeks.",
+"desc": "Evidence-grounded AI co-worker for cancer biology labs - experiment plan in clicks not weeks.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a45ca1648c1169a23e4d53b",
+"title": "Griot AI",
+"desc": "A multi-agent AI storytelling platform that transforms any creative idea into a short story.",
+"tags": [
+"July Creative Industries Challenge",
+"Wildcard Challenge (July)"
+]
+},
+{
+"id": "6a22f222dd943db1b7587f86",
+"title": "EXAMPLE PROJECT PAGE",
+"desc": "1\u20132 sentence summary of what you built, the problem it solves, your AI approach, and why it matters.",
+"tags": [
+"Wildcard Challenge (July)"
+]
+}
+]
+}
+}
