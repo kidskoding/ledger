@@ -1,3 +1,3 @@
 # ibm-skillsbuild-august
 
-ibm skillbuild hackathon for August month - Wildcard Challenge
+ai builders challenge via ibm skillsbuild - august ("build intelligent systems for the future of work")
