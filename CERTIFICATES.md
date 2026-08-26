@@ -5,5 +5,5 @@
   - [PDF Certificate](./certifications/anirudh_watsonxTechnicalEssentials_Badge.pdf)
 
 **Harshini**
-  - [Link](PLACE CREDLY LINK TO CERT HERE)
+  - [Link](PLACEHOLDER FOR CREDLY LINK CERTIFICATE)
   - [PDF Certificate](./certifications/harshini_watsonxTechnicalEssentials_Badge.pdf)
