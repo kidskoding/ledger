@@ -122,3 +122,7 @@ typings/
 # build artifacts
 next-env.d.ts
 tsconfig.tsbuildinfo
+
+# astro build artifacts
+.astro/
+.vercel/
