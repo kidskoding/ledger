@@ -1,0 +1,27 @@
+---
+import Base from "../layouts/Base.astro";
+import { RunClient } from "@/components/run-client";
+---
+
+<Base
+  title="LEDGER"
+  description="Counts the verification work AI created and no dashboard records."
+>
+  <main class="wrap" style="padding-block: 5rem 6rem">
+    <header class="stack" style="gap: 1.4rem; margin-bottom: 3.5rem">
+      <p class="caption">The ledger nobody kept</p>
+      <h1 style="max-width: 20ch">
+        Your most careful engineer looks like your least productive one.
+      </h1>
+      <p style="color: var(--ink-muted)">
+        Reviewing, correcting, and rejecting is real labor, it takes your most
+        experienced people, and it appears in no metric anywhere. LEDGER reads a
+        repository&rsquo;s review history and counts it. Every figure here traces
+        to a review comment and the diff it changed.
+      </p>
+    </header>
+
+    {/* The one interactive island. Everything above ships as static HTML. */}
+    <RunClient client:load />
+  </main>
+</Base>
