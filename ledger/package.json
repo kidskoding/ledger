@@ -4,7 +4,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "cache": "tsx scripts/build-cache.ts",
+    "validate": "tsx scripts/validate.ts",
+    "test": "tsx --test lib/**/*.test.ts"
   },
   "dependencies": {
     "next": "^16.3.3",
