@@ -20,5 +20,9 @@ export function GET(request: Request) {
       { status: 404 },
     );
   }
-  return NextResponse.json(result);
+  return NextResponse.json(result, {
+    headers: {
+      "Cache-Control": "public, max-age=60, stale-while-revalidate=300",
+    },
+  });
 }
