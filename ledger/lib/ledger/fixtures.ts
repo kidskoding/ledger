@@ -100,8 +100,8 @@ export const FIXTURE: RunResult = {
       prsMerged: 28,
       commits: 121,
       linesAdded: 4310,
-      preventedEvents: 1,
-      preventedWeighted: 1,
+      preventedEvents: 0,
+      preventedWeighted: 0,
     },
     {
       login: "reviewer-one",
@@ -128,5 +128,5 @@ export const FIXTURE: RunResult = {
     { period: "2025-Q3", medianCycles: 2.3, prCount: 302 },
     { period: "2025-Q4", medianCycles: 2.4, prCount: 315 },
   ],
-  correlation: { rho: -0.62, n: 4 },
+  correlation: { rho: -0.74, n: 4 },
 };
