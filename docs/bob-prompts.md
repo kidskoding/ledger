@@ -54,14 +54,14 @@ without a cast.
 
 - [ ] **Step 3: Run the tests**
 
-Run: `cd ledger && npx tsx --test lib/ledger/fetch.test.ts`
-Expected: PASS. If `tsx` is missing: `npm i -D tsx`.
+Run: `cd ledger && bun test lib/ledger/fetch.test.ts`
+Expected: PASS.
 
 - [ ] **Step 4: Smoke test against a real repo**
 
 ```bash
 cd ledger
-npx tsx -e "import('./lib/ledger/fetch.ts').then(async m => {
+bun -e "import('./lib/ledger/fetch.ts').then(async m => {
   const prs = await m.fetchPullRequests('astral-sh/ruff', 3);
   console.log(prs.length, prs[0]?.number, prs[0]?.reviewComments.length);
 })"
@@ -113,7 +113,7 @@ Built with IBM Bob."
 
 - [ ] **Step 3: Run the tests**
 
-Run: `cd ledger && npx tsx --test lib/ledger/detect.test.ts`
+Run: `cd ledger && bun test lib/ledger/detect.test.ts`
 Expected: PASS, all six cases.
 
 - [ ] **Step 4: Commit and log the prompt**
@@ -160,14 +160,14 @@ Built with IBM Bob."
 
 - [ ] **Step 3: Run the tests**
 
-Run: `cd ledger && npx tsx --test lib/ledger/granite.test.ts`
+Run: `cd ledger && bun test lib/ledger/granite.test.ts`
 Expected: PASS, all six cases.
 
 - [ ] **Step 4: Smoke test against real watsonx**
 
 ```bash
 cd ledger
-npx tsx -e "import('./lib/ledger/granite.ts').then(async m => {
+bun -e "import('./lib/ledger/granite.ts').then(async m => {
   console.log(await m.classify({
     commentBody: 'This retries three times with no jitter, so under load every caller wakes together.',
     path: 'src/client.ts', line: 42,
@@ -220,7 +220,7 @@ Three small pure functions. One task because they share a test run and none is i
 
 - [ ] **Step 3: Run the tests**
 
-Run: `cd ledger && npx tsx --test lib/ledger/engine.test.ts`
+Run: `cd ledger && bun test lib/ledger/engine.test.ts`
 Expected: PASS.
 
 - [ ] **Step 4: Commit and log the prompt**
