@@ -14,6 +14,131 @@ const LABEL_COUNT = 3;
    between "output predicts prevention" and "it doesn't." */
 const RHO_FLAT_THRESHOLD = -0.2;
 
+/* Label placement geometry. Most real repos have a pile of contributors
+   tied at zero prevented events — a dense horizontal row of dots — so an
+   offset that assumes empty space around a point is not safe. Instead each
+   label tries a ring of candidate positions around its dot and takes the
+   first one whose bounding box clears every other dot, every label already
+   placed, and the viewBox edge. */
+/* LABEL_OFFSET is deliberately bigger than DOT_CLEARANCE, and bigger than
+   DOT_CLEARANCE + LABEL_HALF_HEIGHT: that inequality is what makes the N/S
+   and E/W candidates immune to a whole row or column of tied dots, not just
+   the labeled dot's own neighbours — the two bands stop overlapping by
+   construction, for any x (or y) at all. */
+const LABEL_OFFSET = 20; // distance from dot center to label anchor point
+const LABEL_CHAR_WIDTH = 7.2; // approx glyph width, mono at 0.75rem (~12px), no text-measurement API server-side
+const LABEL_HALF_HEIGHT = 6.5; // approx half-height of one line of label text
+const DOT_CLEARANCE = 10; // half-width of the square kept clear around every dot (covers r=4 plus buffer)
+const EDGE_MARGIN = 2;
+const DIAG = Math.SQRT1_2;
+const CANDIDATE_DIRECTIONS: { dx: number; dy: number }[] = [
+  { dx: 0, dy: -1 }, // N  — tried first: clears a horizontal row of tied dots
+  { dx: 0, dy: 1 }, // S
+  { dx: DIAG, dy: -DIAG }, // NE
+  { dx: DIAG, dy: DIAG }, // SE
+  { dx: -DIAG, dy: -DIAG }, // NW
+  { dx: -DIAG, dy: DIAG }, // SW
+  { dx: 1, dy: 0 }, // E
+  { dx: -1, dy: 0 }, // W
+];
+
+interface Box {
+  x0: number;
+  x1: number;
+  y0: number;
+  y1: number;
+}
+
+function boxesOverlap(a: Box, b: Box): boolean {
+  return a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
+}
+
+function outOfBounds(box: Box): boolean {
+  return box.x0 < EDGE_MARGIN || box.x1 > VIEW_W - EDGE_MARGIN || box.y0 < EDGE_MARGIN || box.y1 > VIEW_H - EDGE_MARGIN;
+}
+
+function candidateBox(cx: number, cy: number, dx: number, dy: number, textWidth: number) {
+  const anchorX = cx + dx * LABEL_OFFSET;
+  const anchorY = cy + dy * LABEL_OFFSET;
+  const box: Box =
+    dx > 0.3
+      ? { x0: anchorX, x1: anchorX + textWidth, y0: anchorY - LABEL_HALF_HEIGHT, y1: anchorY + LABEL_HALF_HEIGHT }
+      : dx < -0.3
+        ? { x0: anchorX - textWidth, x1: anchorX, y0: anchorY - LABEL_HALF_HEIGHT, y1: anchorY + LABEL_HALF_HEIGHT }
+        : {
+            x0: anchorX - textWidth / 2,
+            x1: anchorX + textWidth / 2,
+            y0: anchorY - LABEL_HALF_HEIGHT,
+            y1: anchorY + LABEL_HALF_HEIGHT,
+          };
+  return { box, anchorX, anchorY };
+}
+
+/**
+ * Places at most a handful of labels with an explicit collision guarantee,
+ * not a hope: each label tests every candidate direction against every
+ * other dot, every label already placed, and the viewBox edge, and keeps
+ * the first that clears all three. If none do (labels crammed into a
+ * corner with no free direction at all), it falls back to the candidate
+ * with the least overlap and clamps it into the viewBox — a bounded,
+ * deterministic degrade rather than an unguarded collision.
+ */
+function placeLabels(
+  points: { login: string; cx: number; cy: number }[],
+  labeledLogins: Set<string>
+): Map<string, { x: number; y: number; anchor: "start" | "middle" | "end"; baseline: "hanging" | "middle" | "auto" }> {
+  const dotBoxes = points.map((p) => ({
+    login: p.login,
+    box: { x0: p.cx - DOT_CLEARANCE, x1: p.cx + DOT_CLEARANCE, y0: p.cy - DOT_CLEARANCE, y1: p.cy + DOT_CLEARANCE },
+  }));
+  const placedBoxes: Box[] = [];
+  const result = new Map<
+    string,
+    { x: number; y: number; anchor: "start" | "middle" | "end"; baseline: "hanging" | "middle" | "auto" }
+  >();
+
+  for (const point of points) {
+    if (!labeledLogins.has(point.login)) continue;
+
+    const textWidth = point.login.length * LABEL_CHAR_WIDTH;
+    const otherDots = dotBoxes.filter((d) => d.login !== point.login).map((d) => d.box);
+
+    type Placement = { box: Box; anchorX: number; anchorY: number; dx: number; dy: number };
+    let best: Placement | null = null;
+    let fallback: (Placement & { penalty: number }) | null = null;
+
+    for (const { dx, dy } of CANDIDATE_DIRECTIONS) {
+      const { box, anchorX, anchorY } = candidateBox(point.cx, point.cy, dx, dy, textWidth);
+      const collides = outOfBounds(box) || otherDots.some((b) => boxesOverlap(box, b)) || placedBoxes.some((b) => boxesOverlap(box, b));
+      if (!collides) {
+        best = { box, anchorX, anchorY, dx, dy };
+        break;
+      }
+      const penalty =
+        (outOfBounds(box) ? 100 : 0) +
+        otherDots.filter((b) => boxesOverlap(box, b)).length +
+        placedBoxes.filter((b) => boxesOverlap(box, b)).length;
+      if (!fallback || penalty < fallback.penalty) {
+        fallback = { box, anchorX, anchorY, dx, dy, penalty };
+      }
+    }
+
+    const chosen = best ?? fallback!;
+    placedBoxes.push(chosen.box);
+
+    const anchor = chosen.dx > 0.3 ? "start" : chosen.dx < -0.3 ? "end" : "middle";
+    const baseline = chosen.dy > 0.3 ? "hanging" : chosen.dy < -0.3 ? "auto" : "middle";
+    result.set(point.login, {
+      x: Math.min(Math.max(chosen.anchorX, EDGE_MARGIN), VIEW_W - EDGE_MARGIN),
+      y: Math.min(Math.max(chosen.anchorY, EDGE_MARGIN), VIEW_H - EDGE_MARGIN),
+      anchor,
+      baseline,
+    });
+  }
+
+  return result;
+}
+
 /** Descending rank (1 = highest value). Ties share the average rank. */
 function rankDescending(values: number[]): number[] {
   const order = values.map((_, i) => i).sort((a, b) => values[b] - values[a]);
@@ -85,8 +210,7 @@ export function CorrelationView({
       .map((p) => p.login)
   );
 
-  const centerX = PAD.left + INNER_W / 2;
-  const centerY = PAD.top + INNER_H / 2;
+  const labelPlacements = placeLabels(points, labeled);
   const ticks = pickTicks(n);
   const axisX1 = scalePosition(1, n, PAD.left, INNER_W);
   const axisY1 = scalePosition(1, n, PAD.top, INNER_H);
@@ -190,18 +314,17 @@ export function CorrelationView({
         </text>
 
         {points.map((point) => {
-          const dx = point.cx <= centerX ? 8 : -8;
-          const anchor = point.cx <= centerX ? "start" : "end";
-          const dy = point.cy <= centerY ? 14 : -8;
+          const label = labelPlacements.get(point.login);
           return (
             <g key={point.login}>
               <circle cx={point.cx} cy={point.cy} r={DOT_RADIUS} fill="var(--accent)" />
-              {labeled.has(point.login) && (
+              {label && (
                 <text
                   className="mono"
-                  x={point.cx + dx}
-                  y={point.cy + dy}
-                  textAnchor={anchor}
+                  x={label.x}
+                  y={label.y}
+                  textAnchor={label.anchor}
+                  dominantBaseline={label.baseline}
                   style={{ fontSize: "0.75rem", fill: "var(--ink-muted)" }}
                 >
                   {point.login}
