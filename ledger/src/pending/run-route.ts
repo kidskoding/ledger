@@ -1,4 +1,6 @@
 import type { APIRoute } from "astro";
+import { kv } from "@vercel/kv";
+import { allowRun } from "../lib/ratelimit";
 import { fetchPullRequests } from "../../../lib/ledger/fetch";
 import { detectCandidates } from "../../../lib/ledger/detect";
 import { classify } from "../../../lib/ledger/granite";
@@ -18,8 +20,9 @@ const REPO_PATTERN = /^[\w.-]+\/[\w.-]+$/;
 
 export const prerender = false;
 
-export const GET: APIRoute = ({ url }) => {
+export const GET: APIRoute = ({ url, request }) => {
   const repo = url.searchParams.get("repo")?.trim() ?? "";
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0] ?? "local";
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream({
@@ -30,6 +33,22 @@ export const GET: APIRoute = ({ url }) => {
       try {
         if (!REPO_PATTERN.test(repo)) {
           send({ type: "error", message: "Expected a repository as owner/name." });
+          return;
+        }
+
+        if (!(await allowRun(ip))) {
+          send({
+            type: "error",
+            message:
+              "Five runs an hour. Try one of the study repositories meanwhile.",
+          });
+          return;
+        }
+
+        // A repeat run on the same repository costs no model calls.
+        const cached = await kv.get<RunResult>(`result:${repo}`).catch(() => null);
+        if (cached) {
+          send({ type: "done", result: cached });
           return;
         }
 
@@ -97,24 +116,24 @@ export const GET: APIRoute = ({ url }) => {
           (a, b) => b.preventedWeighted - a.preventedWeighted,
         );
 
-        send({
-          type: "done",
-          result: {
-            repo,
-            generatedAt: new Date().toISOString(),
-            prsAnalyzed: pulls.length,
-            events,
-            contributors,
-            cycles: cycleBuckets(pulls),
-            correlation: {
-              rho: spearman(
-                contributors.map((c) => c.prsMerged),
-                contributors.map((c) => c.preventedWeighted),
-              ),
-              n: contributors.length,
-            },
-          } satisfies RunResult,
-        });
+        const result: RunResult = {
+          repo,
+          generatedAt: new Date().toISOString(),
+          prsAnalyzed: pulls.length,
+          events,
+          contributors,
+          cycles: cycleBuckets(pulls),
+          correlation: {
+            rho: spearman(
+              contributors.map((c) => c.prsMerged),
+              contributors.map((c) => c.preventedWeighted),
+            ),
+            n: contributors.length,
+          },
+        };
+
+        await kv.set(`result:${repo}`, result, { ex: 604_800 }).catch(() => {});
+        send({ type: "done", result });
       } catch (error) {
         send({
           type: "error",
