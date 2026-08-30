@@ -14,7 +14,7 @@ flowchart TB
         UI[Repo input + three views]
     end
 
-    subgraph server [Next.js route handlers]
+    subgraph server [Astro server endpoints]
         RUN["/api/run · SSE stream"]
         CACHE["/api/cached · study repos"]
     end
@@ -112,9 +112,9 @@ Three, not one, because a correlation from a single project is an anecdote. All 
 
 ## Runtime
 
-Next.js and TypeScript on Vercel. One repository, one language.
+Astro and TypeScript on Vercel, with Bun as the local toolchain. The page is a static header plus one interactive React island, so everything except the streaming client ships as HTML with no JavaScript runtime.
 
-- **Streaming.** The live path is a route handler returning `text/event-stream`, emitting one event per classification. Removes the serverless timeout ceiling and makes the filling log part of the demo.
+- **Streaming.** The live path is a server endpoint returning `text/event-stream`, emitting one event per classification. Removes the serverless timeout ceiling and makes the filling log part of the demo.
 - **Limits.** 50 PRs per run. Rate limited per IP via Vercel KV. Results cached per repository, so a repeat run costs no Granite calls.
 - **Secrets.** GitHub and watsonx credentials are server-side only. No client ever sees a key.
 - **No database, no auth, no accounts.** Cached JSON on disk for the study repos, KV for rate limiting and run results.
@@ -128,7 +128,7 @@ The application lives in `ledger/`. Repository root stays documentation.
 | Path | Built with | Contents |
 |---|---|---|
 | `ledger/lib/ledger/` | **IBM Bob** | `fetch.ts`, `detect.ts`, `granite.ts`, `severity.ts`, `cycles.ts`, `baseline.ts` + tests |
-| `ledger/app/`, `ledger/components/` | Claude Code | UI, charts, streaming client, design system |
+| `ledger/src/` | Claude Code | Pages, server endpoints, React islands, design system |
 | `ledger/scripts/` | Claude Code | Study-repo cache builder, labeling harness |
 | `ledger/data/` | generated | Precomputed study repos, hand labels |
 
