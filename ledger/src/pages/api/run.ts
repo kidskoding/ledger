@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { kv } from "@vercel/kv";
-import { allowRun } from "../lib/ratelimit";
+import { allowRun } from "../../lib/ratelimit";
 import { fetchPullRequests } from "../../../lib/ledger/fetch";
 import { detectCandidates } from "../../../lib/ledger/detect";
 import { classify } from "../../../lib/ledger/granite";
@@ -60,7 +60,7 @@ export const GET: APIRoute = ({ url, request }) => {
 
         for (const pull of pulls) {
           try {
-            for (const candidate of detectCandidates(pull)) {
+            for (const candidate of detectCandidates(pull, repo)) {
               const classification = await classify(candidate);
               if (!classification.substantive) continue;
               const event: PreventedEvent = {

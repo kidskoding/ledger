@@ -69,7 +69,7 @@ async function analyze(repo: string, limit: number, out: string): Promise<RunRes
   for (let i = 0; i < pulls.length; i++) {
     const pull = pulls[i];
     try {
-      for (const candidate of detectCandidates(pull)) {
+      for (const candidate of detectCandidates(pull, repo)) {
         const classification = await classify(candidate);
         if (!classification.substantive) continue;
         const event: PreventedEvent = {
