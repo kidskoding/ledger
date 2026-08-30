@@ -1,4 +1,3 @@
-"use client";
 
 import { useState, type CSSProperties } from "react";
 import type { PreventedEvent, Severity } from "@/lib/ledger/types";

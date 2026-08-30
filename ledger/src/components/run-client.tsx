@@ -1,10 +1,9 @@
-"use client";
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { PreventedEvent, RunEvent, RunResult } from "@/lib/ledger/types";
-import { PreventedLog } from "@/components/prevented-log";
-import { CorrelationView } from "@/components/correlation";
-import { CycleTrend } from "@/components/cycle-trend";
+import { PreventedLog } from "./prevented-log";
+import { CorrelationView } from "./correlation";
+import { CycleTrend } from "./cycle-trend";
 
 /** Slug matches the key `/api/cached` expects; repo is the full owner/name shown to the reader. */
 const STUDY_REPOS = [
