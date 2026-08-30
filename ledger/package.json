@@ -2,15 +2,18 @@
   "name": "ledger",
   "version": "0.1.0",
   "scripts": {
-    "dev": "bun --bun next dev",
-    "build": "bun --bun next build",
-    "start": "bun --bun next start",
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
     "cache": "bun scripts/build-cache.ts",
     "validate": "bun scripts/validate.ts",
     "test": "bun test lib"
   },
   "dependencies": {
-    "next": "^16.3.3",
+    "@astrojs/react": "^6.0.4",
+    "@astrojs/vercel": "^11.0.8",
+    "astro": "^7.2.9",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
