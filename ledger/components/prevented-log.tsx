@@ -29,51 +29,60 @@ function Row({ event }: { event: PreventedEvent }) {
   const detailId = `prevented-detail-${event.id}`;
 
   return (
-    <div className="row" style={{ gridTemplateColumns: COLUMNS, padding: 0 }}>
+    <div role="row" className="row" style={{ gridTemplateColumns: COLUMNS, padding: 0 }}>
       <span
+        role="cell"
         className="caption"
         style={{ ...CELL, color: severityColor(event.severity) }}
       >
         {event.severity}
       </span>
 
-      <button
-        type="button"
-        onClick={() => setExpanded((v) => !v)}
-        aria-expanded={expanded}
-        aria-controls={detailId}
-        style={{
-          ...CELL,
-          background: "none",
-          border: 0,
-          font: "inherit",
-          color: "inherit",
-          textAlign: "left",
-          cursor: "pointer",
-          width: "100%",
-        }}
-      >
-        {event.classification.summary || event.prTitle}
-      </button>
+      <span role="cell">
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          aria-expanded={expanded}
+          aria-controls={detailId}
+          style={{
+            ...CELL,
+            background: "none",
+            border: 0,
+            font: "inherit",
+            color: "inherit",
+            textAlign: "left",
+            cursor: "pointer",
+            width: "100%",
+          }}
+        >
+          {event.classification.summary || event.prTitle}
+        </button>
+      </span>
 
-      <a
-        href={event.commentUrl}
-        target="_blank"
-        rel="noreferrer noopener"
-        className="mono"
-        style={CELL}
-      >
-        {event.path}:{event.line}
-      </a>
+      <span role="cell">
+        <a
+          href={event.commentUrl}
+          target="_blank"
+          rel="noreferrer noopener"
+          className="mono"
+          style={{ ...CELL, display: "block" }}
+        >
+          {event.path}:{event.line}
+        </a>
+      </span>
 
-      <span style={CELL}>{event.reviewer}</span>
+      <span role="cell" style={CELL}>{event.reviewer}</span>
 
-      <time className="fig" dateTime={event.createdAt} style={CELL}>
+      <time role="cell" className="fig" dateTime={event.createdAt} style={CELL}>
         {isoDate(event.createdAt)}
       </time>
 
       {expanded && (
-        <div id={detailId} style={{ gridColumn: "1 / -1", padding: "0 0 1.1rem" }}>
+        <div
+          role="presentation"
+          id={detailId}
+          style={{ gridColumn: "1 / -1", padding: "0 0 1.1rem" }}
+        >
           <p style={{ marginBottom: "0.6rem" }}>{event.commentBody}</p>
           <a
             href={event.fixCommitUrl}
@@ -115,26 +124,26 @@ export function PreventedLog({ events }: { events: PreventedEvent[] }) {
       </p>
 
       <div className="scroll-x" style={{ marginTop: "1rem" }}>
-        <div style={{ minWidth: "48rem" }}>
-          <div className="row" style={{ gridTemplateColumns: COLUMNS, padding: 0 }}>
-            <span className="caption" style={CELL}>
+        <div role="table" style={{ minWidth: "48rem" }}>
+          <div role="row" className="row" style={{ gridTemplateColumns: COLUMNS, padding: 0 }}>
+            <span role="columnheader" className="caption" style={CELL}>
               Severity
             </span>
-            <span className="caption" style={CELL}>
+            <span role="columnheader" className="caption" style={CELL}>
               What was caught
             </span>
-            <span className="caption" style={CELL}>
+            <span role="columnheader" className="caption" style={CELL}>
               Where
             </span>
-            <span className="caption" style={CELL}>
+            <span role="columnheader" className="caption" style={CELL}>
               Who caught it
             </span>
-            <span className="caption" style={CELL}>
+            <span role="columnheader" className="caption" style={CELL}>
               When
             </span>
           </div>
 
-          <div className="rows">
+          <div role="presentation" className="rows">
             {events.map((event) => (
               <Row key={event.id} event={event} />
             ))}
