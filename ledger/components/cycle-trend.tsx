@@ -6,9 +6,16 @@ import type { CycleBucket } from "@/lib/ledger/types";
    keeps it legible, scaling one down does not. */
 const VIEW_W = 400;
 const VIEW_H = 140;
-const PAD = { top: 14, bottom: 14, left: 4, right: 44 };
+const PAD = { top: 14, bottom: 14, left: 28, right: 44 };
 const INNER_W = VIEW_W - PAD.left - PAD.right;
 const INNER_H = VIEW_H - PAD.top - PAD.bottom;
+
+/* Zero-anchored domain ceiling: round the max up to a sensible step, with
+   headroom baked in so the top data point never touches the ceiling. */
+function niceMax(max: number): number {
+  const step = max <= 5 ? 0.5 : max <= 20 ? 2 : 5;
+  return Math.ceil((max + step * 0.5) / step) * step;
+}
 
 export function CycleTrend({ cycles }: { cycles: CycleBucket[] }) {
   if (cycles.length < 2) {
@@ -25,12 +32,12 @@ export function CycleTrend({ cycles }: { cycles: CycleBucket[] }) {
   const first = cycles[0];
   const last = cycles[cycles.length - 1];
   const values = cycles.map((c) => c.medianCycles);
-  const min = Math.min(...values);
   const max = Math.max(...values);
-  const range = max - min || 1;
+  const domainMax = niceMax(max);
+  const yTicks = [0, domainMax / 2, domainMax];
 
   const x = (i: number) => PAD.left + (i / (cycles.length - 1)) * INNER_W;
-  const y = (v: number) => PAD.top + (1 - (v - min) / range) * INNER_H;
+  const y = (v: number) => PAD.top + (1 - v / domainMax) * INNER_H;
 
   const pathD = cycles
     .map((c, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(2)},${y(c.medianCycles).toFixed(2)}`)
@@ -60,6 +67,20 @@ export function CycleTrend({ cycles }: { cycles: CycleBucket[] }) {
         role="img"
         aria-label={`Line chart of median review rounds per pull request by quarter, rising from ${first.medianCycles.toFixed(1)} in ${first.period} to ${last.medianCycles.toFixed(1)} in ${last.period}.`}
       >
+        {yTicks.map((t) => (
+          <text
+            key={t}
+            x={PAD.left - 6}
+            y={y(t)}
+            dominantBaseline="middle"
+            textAnchor="end"
+            className="mono"
+            fontSize={11}
+            fill="var(--ink-faint)"
+          >
+            {Number.isInteger(t) ? t : t.toFixed(1)}
+          </text>
+        ))}
         <path d={pathD} fill="none" stroke="var(--accent)" strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round" />
         <circle cx={endX} cy={endY} r={4} fill="var(--accent)" />
         <text
