@@ -1,14 +1,14 @@
-
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import type { PreventedEvent, RunEvent, RunResult } from "@/lib/ledger/types";
 import { PreventedLog } from "./prevented-log";
 import { CorrelationView } from "./correlation";
 import { CycleTrend } from "./cycle-trend";
+import { VerdictBand, WhoCaught } from "./verdict";
 
 /** Slug matches the key `/api/cached` expects; repo is the full owner/name shown to the reader. */
 const STUDY_REPOS = [
-  { slug: "pandas", repo: "pandas-dev/pandas" },
   { slug: "ruff", repo: "astral-sh/ruff" },
+  { slug: "pandas", repo: "pandas-dev/pandas" },
   { slug: "next", repo: "vercel/next.js" },
 ] as const;
 
@@ -25,6 +25,15 @@ const BUTTON: CSSProperties = {
   background: "transparent",
   color: "var(--ink)",
   cursor: "pointer",
+};
+
+/* Restates `border` in full rather than overriding `borderColor`: React
+   warns when a shorthand and a longhand for the same property both appear
+   across renders, and the colour then flickers back on re-render. */
+const BUTTON_ACTIVE: CSSProperties = {
+  ...BUTTON,
+  border: "1px solid var(--accent)",
+  background: "var(--accent-sunk)",
 };
 
 function isValidRepo(value: string): boolean {
@@ -55,8 +64,9 @@ function Section({ n, title, note, children }: { n: string; title: string; note:
   );
 }
 
-export function RunClient() {
-  const [result, setResult] = useState<RunResult | null>(null);
+export function RunClient({ initial }: { initial?: RunResult }) {
+  const [result, setResult] = useState<RunResult | null>(initial ?? null);
+  const [openRepo, setOpenRepo] = useState<string | null>(initial?.repo ?? null);
   const [liveEvents, setLiveEvents] = useState<PreventedEvent[]>([]);
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [liveRepo, setLiveRepo] = useState("");
@@ -70,9 +80,10 @@ export function RunClient() {
   // Cancel an in-flight run if the reader navigates away mid-stream.
   useEffect(() => stopLiveRun, [stopLiveRun]);
 
-  async function loadCached(slug: string) {
+  async function loadCached(slug: string, repo: string) {
     stopLiveRun();
     setResult(null);
+    setOpenRepo(repo);
     setLiveEvents([]);
     setStatus({ kind: "loading" });
     try {
@@ -114,6 +125,7 @@ export function RunClient() {
   async function startLiveRun(repo: string) {
     stopLiveRun();
     setResult(null);
+    setOpenRepo(repo);
     setLiveEvents([]);
     const controller = new AbortController();
     abortRef.current = controller;
@@ -154,11 +166,44 @@ export function RunClient() {
 
   return (
     <div className="stack" style={{ gap: "3rem" }}>
-      <section className="ruled stack" style={{ gap: "1rem", marginBottom: "1rem" }}>
-        <p className="caption">Open a repository</p>
+      {/* The figures come first. A reader who scrolls no further has still
+          seen the finding, and every one of them is a count. */}
+      {result ? (
+        <VerdictBand result={result} />
+      ) : (
+        <div
+          style={{
+            borderTop: "1px solid var(--rule-strong)",
+            borderBottom: "1px solid var(--rule-strong)",
+            padding: "1.5rem 0",
+          }}
+        >
+          <p className="mono" style={{ color: placeholderColor(status), fontSize: "0.9rem" }}>
+            {placeholderText(status)}
+          </p>
+        </div>
+      )}
+
+      <section className="stack" style={{ gap: "1rem" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", alignItems: "baseline" }}>
+          <p className="caption">Open a repository</p>
+          {result && (
+            <p className="mono" style={{ fontSize: "0.75rem", color: "var(--ink-faint)" }}>
+              reading {result.prsAnalyzed} most recent merged pull requests · {result.generatedAt.slice(0, 10)}
+            </p>
+          )}
+        </div>
+
         <div style={{ display: "flex", flexWrap: "wrap", gap: "0.6rem" }}>
           {STUDY_REPOS.map(({ slug, repo }) => (
-            <button key={slug} type="button" className="mono" style={BUTTON} onClick={() => loadCached(slug)}>
+            <button
+              key={slug}
+              type="button"
+              className="mono"
+              aria-pressed={openRepo === repo}
+              style={openRepo === repo ? BUTTON_ACTIVE : BUTTON}
+              onClick={() => loadCached(slug, repo)}
+            >
               {repo}
             </button>
           ))}
@@ -175,7 +220,7 @@ export function RunClient() {
           <input
             type="text"
             className="mono"
-            placeholder="owner/name — run live"
+            placeholder="owner/name — run live against the GitHub API"
             value={liveRepo}
             onChange={(e) => setLiveRepo(e.target.value)}
             style={{
@@ -200,8 +245,22 @@ export function RunClient() {
 
       <Section
         n="I"
-        title="Prevented events"
-        note="Review comments anchored to lines that a later commit changed, classified by IBM Granite as a substantive catch rather than a style nit."
+        title="Who caught it"
+        note="Prevented events per reviewer. The concentration is the finding: in every repository measured, a handful of people account for nearly all of it."
+      >
+        {result ? (
+          <WhoCaught result={result} />
+        ) : (
+          <p className="mono" style={{ color: placeholderColor(status) }}>
+            {placeholderText(status)}
+          </p>
+        )}
+      </Section>
+
+      <Section
+        n="II"
+        title="The evidence"
+        note="Review comments anchored to lines that a later commit changed, classified by IBM Granite as a substantive catch rather than a style nit. Each row opens to the comment and links the commit that answered it."
       >
         {status.kind === "streaming" ? (
           <div className="stack" style={{ gap: "0.75rem" }}>
@@ -216,7 +275,7 @@ export function RunClient() {
               /* The log's empty state reads as a verdict. During a run there
                  is no verdict yet, so say what is happening instead. */
               <p className="mono" style={{ color: "var(--ink-faint)", fontSize: "0.85rem" }}>
-                Reading review history\u2026 findings appear here as Granite classifies them.
+                Reading review history… findings appear here as Granite classifies them.
               </p>
             )}
           </div>
@@ -230,9 +289,9 @@ export function RunClient() {
       </Section>
 
       <Section
-        n="II"
+        n="III"
         title="Output against prevention"
-        note="Conventional productivity metrics per contributor, against prevented events. The rank correlation is reported at whatever value it comes out to."
+        note="Every contributor ranked twice — by what gets counted, and by what got caught. The rank correlation is reported at whatever value it comes out to."
       >
         {result ? (
           <CorrelationView contributors={result.contributors} correlation={result.correlation} />
@@ -243,15 +302,14 @@ export function RunClient() {
         )}
       </Section>
 
-      <Section n="III" title="Review cycles" note="Review rounds per pull request over time. Counted, never estimated.">
-        {result ? (
+      {/* Rendered only when there is a trend to draw. A single quarter of
+          history is not a trend, and an empty section reads as a broken
+          one. */}
+      {result && result.cycles.length >= 2 && (
+        <Section n="IV" title="Review cycles" note="Review rounds per pull request over time. Counted, never estimated.">
           <CycleTrend cycles={result.cycles} />
-        ) : (
-          <p className="mono" style={{ color: placeholderColor(status) }}>
-            {placeholderText(status)}
-          </p>
-        )}
-      </Section>
+        </Section>
+      )}
     </div>
   );
 }

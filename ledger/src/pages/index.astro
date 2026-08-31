@@ -1,27 +1,34 @@
 ---
 import Base from "../layouts/Base.astro";
 import { RunClient } from "../components/run-client";
+import initial from "../../data/ruff.json";
+import type { RunResult } from "../../lib/ledger/types";
 ---
 
 <Base
   title="LEDGER"
   description="Counts the verification work AI created and no dashboard records."
 >
-  <main class="wrap" style="padding-block: 5rem 6rem">
-    <header class="stack" style="gap: 1.4rem; margin-bottom: 3.5rem">
+  <main class="wrap" style="padding-block: 4.5rem 6rem">
+    <header class="stack" style="gap: 1.4rem; margin-bottom: 3rem">
       <p class="caption">The ledger nobody kept</p>
-      <h1 style="max-width: 20ch">
-        Your most careful engineer looks like your least productive one.
+      <h1 style="max-width: 22ch">
+        A handful of people catch everything. No metric records it.
       </h1>
       <p style="color: var(--ink-muted)">
         Reviewing, correcting, and rejecting is real labor, it takes your most
-        experienced people, and it appears in no metric anywhere. LEDGER reads a
-        repository&rsquo;s review history and counts it. Every figure here traces
-        to a review comment and the diff it changed.
+        experienced people, and it appears in no dashboard anywhere. LEDGER reads
+        a repository&rsquo;s review history and counts it: every comment that
+        changed the code, who left it, and how many lines moved because of it.
+        Every figure below traces to a review comment and the diff it changed.
       </p>
     </header>
 
-    {/* The one interactive island. Everything above ships as static HTML. */}
-    <RunClient client:load />
+    {/*
+      The one interactive island — and it arrives with a repository already
+      open. A reader who does nothing at all still lands on the finding
+      rather than on three empty sections.
+    */}
+    <RunClient client:load initial={initial as RunResult} />
   </main>
 </Base>

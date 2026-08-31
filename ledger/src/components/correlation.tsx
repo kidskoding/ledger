@@ -27,6 +27,12 @@ const RHO_FLAT_THRESHOLD = -0.2;
    the labeled dot's own neighbours — the two bands stop overlapping by
    construction, for any x (or y) at all. */
 const LABEL_OFFSET = 20; // distance from dot center to label anchor point
+/* A second, further ring. With several labeled dots sitting in the same row
+   of ties, the nearest N slot is taken by whichever label was placed first
+   and every remaining direction collides — so the later labels fall back to
+   a known overlap. Trying the same directions further out first gives them
+   somewhere clean to go. */
+const LABEL_OFFSET_RINGS = [LABEL_OFFSET, LABEL_OFFSET * 2.1];
 const LABEL_CHAR_WIDTH = 7.2; // approx glyph width, mono at 0.75rem (~12px), no text-measurement API server-side
 const LABEL_HALF_HEIGHT = 6.5; // approx half-height of one line of label text
 const DOT_CLEARANCE = 10; // half-width of the square kept clear around every dot (covers r=4 plus buffer)
@@ -58,9 +64,9 @@ function outOfBounds(box: Box): boolean {
   return box.x0 < EDGE_MARGIN || box.x1 > VIEW_W - EDGE_MARGIN || box.y0 < EDGE_MARGIN || box.y1 > VIEW_H - EDGE_MARGIN;
 }
 
-function candidateBox(cx: number, cy: number, dx: number, dy: number, textWidth: number) {
-  const anchorX = cx + dx * LABEL_OFFSET;
-  const anchorY = cy + dy * LABEL_OFFSET;
+function candidateBox(cx: number, cy: number, dx: number, dy: number, textWidth: number, offset: number) {
+  const anchorX = cx + dx * offset;
+  const anchorY = cy + dy * offset;
   const box: Box =
     dx > 0.3
       ? { x0: anchorX, x1: anchorX + textWidth, y0: anchorY - LABEL_HALF_HEIGHT, y1: anchorY + LABEL_HALF_HEIGHT }
@@ -108,20 +114,23 @@ function placeLabels(
     let best: Placement | null = null;
     let fallback: (Placement & { penalty: number }) | null = null;
 
-    for (const { dx, dy } of CANDIDATE_DIRECTIONS) {
-      const { box, anchorX, anchorY } = candidateBox(point.cx, point.cy, dx, dy, textWidth);
-      const collides = outOfBounds(box) || otherDots.some((b) => boxesOverlap(box, b)) || placedBoxes.some((b) => boxesOverlap(box, b));
-      if (!collides) {
-        best = { box, anchorX, anchorY, dx, dy };
-        break;
+    for (const offset of LABEL_OFFSET_RINGS) {
+      for (const { dx, dy } of CANDIDATE_DIRECTIONS) {
+        const { box, anchorX, anchorY } = candidateBox(point.cx, point.cy, dx, dy, textWidth, offset);
+        const collides = outOfBounds(box) || otherDots.some((b) => boxesOverlap(box, b)) || placedBoxes.some((b) => boxesOverlap(box, b));
+        if (!collides) {
+          best = { box, anchorX, anchorY, dx, dy };
+          break;
+        }
+        const penalty =
+          (outOfBounds(box) ? 100 : 0) +
+          otherDots.filter((b) => boxesOverlap(box, b)).length +
+          placedBoxes.filter((b) => boxesOverlap(box, b)).length;
+        if (!fallback || penalty < fallback.penalty) {
+          fallback = { box, anchorX, anchorY, dx, dy, penalty };
+        }
       }
-      const penalty =
-        (outOfBounds(box) ? 100 : 0) +
-        otherDots.filter((b) => boxesOverlap(box, b)).length +
-        placedBoxes.filter((b) => boxesOverlap(box, b)).length;
-      if (!fallback || penalty < fallback.penalty) {
-        fallback = { box, anchorX, anchorY, dx, dy, penalty };
-      }
+      if (best) break;
     }
 
     const chosen = best ?? fallback!;
@@ -231,7 +240,7 @@ export function CorrelationView({
       ? "The people shipping most are not the people catching most."
       : correlation.rho < -RHO_FLAT_THRESHOLD
         ? "Output rank tells you nothing about who prevents problems."
-        : "The people shipping most are also the people catching most \u2014 here, reviewing and merging are the same hands.";
+        : "The people shipping most are also the people catching most \u2014 the same hands do both, and only the shipping half is counted.";
 
   return (
     <section className="stack" style={{ gap: "1rem" }}>
@@ -243,6 +252,11 @@ export function CorrelationView({
         across <span className="fig">{correlation.n}</span> contributors. {finding}
       </p>
 
+      {/* The chart is authored in a 420-unit coordinate space, so letting it
+          stretch to a full desktop column scales every glyph inside it by
+          two and a half. Cap the rendered width near the authored one and
+          the type stays the size it was designed at. */}
+      <div style={{ width: "100%", maxWidth: `${VIEW_W * 1.35}px` }}>
       <svg
         viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
         preserveAspectRatio="xMidYMid meet"
@@ -342,11 +356,16 @@ export function CorrelationView({
               <title>{`${point.login}: ${point.prsMerged} PRs merged, ${point.preventedEvents} prevented`}</title>
               {/* Generous invisible target: a 4px dot is hard to hit. */}
               <circle cx={point.cx} cy={point.cy} r={14} fill="transparent" />
+              {/* Contributors tie on both ranks often enough that dots land
+                  exactly on top of each other. Partial opacity makes a stack
+                  read darker than a single dot, so a chart of 31 people does
+                  not look like a chart of 14. */}
               <circle
                 cx={point.cx}
                 cy={point.cy}
                 r={active ? DOT_RADIUS + 2.5 : DOT_RADIUS}
                 fill="var(--accent)"
+                fillOpacity={active ? 1 : 0.55}
               />
               {label && (
                 <text
@@ -364,6 +383,7 @@ export function CorrelationView({
           );
         })}
       </svg>
+      </div>
 
       {/* Reserves its line whether or not anything is hovered, so the chart
           does not jump as the pointer moves across it. */}

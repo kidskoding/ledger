@@ -61,6 +61,10 @@ export function CycleTrend({ cycles }: { cycles: CycleBucket[] }) {
         </p>
       </div>
 
+      {/* Capped for the same reason as the scatter: stretching a 400-unit
+          coordinate space across a desktop column scales the tick labels
+          inside it well past the size they were set at. */}
+      <div style={{ width: "100%", maxWidth: `${VIEW_W * 1.35}px` }}>
       <svg
         viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
         width="100%"
@@ -95,6 +99,7 @@ export function CycleTrend({ cycles }: { cycles: CycleBucket[] }) {
           {last.medianCycles.toFixed(1)}
         </text>
       </svg>
+      </div>
 
       <div
         className="ruled"

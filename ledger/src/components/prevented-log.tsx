@@ -3,6 +3,7 @@ import { useState, type CSSProperties } from "react";
 
 import { SEVERITY_WEIGHT } from "@/lib/ledger/types";
 import type { PreventedEvent, Severity } from "@/lib/ledger/types";
+import { linesChangedByReview } from "@/lib/ledger/summary";
 
 /**
  * A real repository produces well over a hundred events. Rendering them all
@@ -12,16 +13,29 @@ import type { PreventedEvent, Severity } from "@/lib/ledger/types";
 const VISIBLE_BY_DEFAULT = 15;
 
 /** Fixed track widths so the header captions and every data row line up. */
-const COLUMNS = "6rem minmax(220px,1.4fr) minmax(180px,1fr) 8rem 7rem";
+/* The reviewer track is sized for a real GitHub login, not a short one:
+   `jorisvandenbossch` is seventeen characters and used to run straight
+   through the date beside it. */
+const COLUMNS = "5.5rem minmax(220px,1.4fr) minmax(170px,1fr) 11.5rem 7rem";
 
 /**
  * Full repository paths run long enough to collide with the columns beside
  * them. The tail is the part that identifies the code, so keep that and let
  * the link's title carry the whole path.
  */
+/* Roughly what the `Where` track fits before the cell ellipsis starts
+   eating the line number off the end. */
+const PATH_BUDGET = 26;
+
 function shortenPath(path: string): string {
   const parts = path.split("/");
-  return parts.length <= 2 ? path : `\u2026/${parts.slice(-2).join("/")}`;
+  if (parts.length <= 2) return path;
+
+  const twoDeep = `\u2026/${parts.slice(-2).join("/")}`;
+  // The line number is the part that makes the reference checkable, and it
+  // sits at the end where the ellipsis would cut it. Drop directory depth
+  // before letting that happen.
+  return twoDeep.length <= PATH_BUDGET ? twoDeep : `\u2026/${parts[parts.length - 1]}`;
 }
 
 /** Every interactive/text cell shares this padding so baselines line up
@@ -124,6 +138,11 @@ function Row({ event }: { event: PreventedEvent }) {
 }
 
 export function PreventedLog({ events }: { events: PreventedEvent[] }) {
+  // Declared before the empty-run branch below: hook order has to be the
+  // same on every render, and this component does go from zero events to
+  // some when a repository is swapped underneath it.
+  const [showAll, setShowAll] = useState(false);
+
   if (events.length === 0) {
     return (
       <div className="ruled">
@@ -134,9 +153,8 @@ export function PreventedLog({ events }: { events: PreventedEvent[] }) {
     );
   }
 
-  const [showAll, setShowAll] = useState(false);
   const prCount = new Set(events.map((e) => `${e.repo}#${e.prNumber}`)).size;
-  const highCount = events.filter((e) => e.severity === "high").length;
+  const linesChanged = linesChangedByReview(events);
 
   // Severity first, then most recent, so the strongest evidence is on screen
   // without scrolling.
@@ -154,12 +172,13 @@ export function PreventedLog({ events }: { events: PreventedEvent[] }) {
           {events.length} prevented {pluralize(events.length, "event")}
         </span>{" "}
         across <span className="fig">{prCount}</span> pull{" "}
-        {pluralize(prCount, "request")}.{" "}
-        <span className="fig">{highCount}</span> in high-blast-radius paths.
+        {pluralize(prCount, "request")}, which moved{" "}
+        <span className="fig">{linesChanged.toLocaleString("en-US")}</span> lines of code. Every row
+        below links to the comment and the commit that answered it.
       </p>
 
       <div className="scroll-x" style={{ marginTop: "1rem" }}>
-        <div role="table" style={{ minWidth: "48rem" }}>
+        <div role="table" style={{ minWidth: "52rem" }}>
           <div role="row" className="row" style={{ gridTemplateColumns: COLUMNS, padding: 0 }}>
             <span role="columnheader" className="caption" style={CELL}>
               Severity
@@ -205,9 +224,7 @@ export function PreventedLog({ events }: { events: PreventedEvent[] }) {
             cursor: "pointer",
           }}
         >
-          {showAll
-            ? `Show the ${VISIBLE_BY_DEFAULT} highest-severity`
-            : `Show all ${ranked.length}`}
+          {showAll ? `Show the first ${VISIBLE_BY_DEFAULT}` : `Show all ${ranked.length}`}
         </button>
       )}
     </div>
