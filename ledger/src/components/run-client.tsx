@@ -210,7 +210,15 @@ export function RunClient() {
                 ? `${status.prsDone} / ${status.prsTotal} pull requests`
                 : `Starting run for ${status.repo}…`}
             </p>
-            <PreventedLog events={liveEvents} />
+            {liveEvents.length > 0 ? (
+              <PreventedLog events={liveEvents} />
+            ) : (
+              /* The log's empty state reads as a verdict. During a run there
+                 is no verdict yet, so say what is happening instead. */
+              <p className="mono" style={{ color: "var(--ink-faint)", fontSize: "0.85rem" }}>
+                Reading review history\u2026 findings appear here as Granite classifies them.
+              </p>
+            )}
           </div>
         ) : result ? (
           <PreventedLog events={result.events} />
