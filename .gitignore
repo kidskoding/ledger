@@ -1,8 +1,14 @@
+# bob
+.bob
+
+# playwright
 .playwright-mcp
 
 # superpowers
 .superpowers
-docs/superpowers
+
+# docs
+docs/
 
 # custom ignores
 dist
