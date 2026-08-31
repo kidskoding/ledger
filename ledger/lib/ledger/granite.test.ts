@@ -158,13 +158,15 @@ describe("classify", () => {
     restoreFetch();
   });
 
-  it("HTTP 500 from watsonx returns fallback without throwing", async () => {
+  it("HTTP 500 from watsonx returns fallback after retries are exhausted", async () => {
+    let attempts = 0;
     (globalThis as any).fetch = (url: string) => {
       if (url.includes("iam.cloud.ibm.com")) return Promise.resolve(makeIamResponse());
+      attempts++;
       return Promise.resolve(
         new Response(JSON.stringify({ error: "internal" }), {
           status: 500,
-          headers: { "content-type": "application/json" },
+          headers: new Headers({ "content-type": "application/json", "Retry-After": "0" }),
         }),
       );
     };
@@ -172,6 +174,49 @@ describe("classify", () => {
     const result = await classify(CANDIDATE);
     assert.equal(result.substantive, false);
     assert.equal(result.classifier, "granite");
+    assert.equal(attempts, 4, "should attempt 4 times before giving up");
+    restoreFetch();
+  });
+
+  it("HTTP 429 retries and succeeds on the second attempt", async () => {
+    let attempts = 0;
+    (globalThis as any).fetch = (url: string) => {
+      if (url.includes("iam.cloud.ibm.com")) return Promise.resolve(makeIamResponse());
+      attempts++;
+      if (attempts === 1) {
+        return Promise.resolve(
+          new Response(JSON.stringify({ error: "rate limited" }), {
+            status: 429,
+            headers: new Headers({ "content-type": "application/json", "Retry-After": "0" }),
+          }),
+        );
+      }
+      return Promise.resolve(makeWatsonxResponse('{"substantive": true, "summary": "Caught a bug."}'));
+    };
+
+    const result = await classify(CANDIDATE);
+    assert.equal(result.substantive, true);
+    assert.equal(result.summary, "Caught a bug.");
+    assert.equal(attempts, 2, "should succeed on second attempt");
+    restoreFetch();
+  });
+
+  it("non-429 4xx falls through immediately without retry", async () => {
+    let attempts = 0;
+    (globalThis as any).fetch = (url: string) => {
+      if (url.includes("iam.cloud.ibm.com")) return Promise.resolve(makeIamResponse());
+      attempts++;
+      return Promise.resolve(
+        new Response(JSON.stringify({ error: "bad request" }), {
+          status: 400,
+          headers: new Headers({ "content-type": "application/json" }),
+        }),
+      );
+    };
+
+    const result = await classify(CANDIDATE);
+    assert.equal(result.substantive, false);
+    assert.equal(attempts, 1, "should not retry on 400");
     restoreFetch();
   });
 

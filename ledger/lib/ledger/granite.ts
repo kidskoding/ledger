@@ -10,6 +10,11 @@
 
 import type { Classification, ClassifiableCandidate } from "./types.ts";
 
+/** Sleep for `ms` milliseconds. */
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 // ---------------------------------------------------------------------------
 // IAM token cache
 // ---------------------------------------------------------------------------
@@ -155,30 +160,60 @@ export async function classify(candidate: ClassifiableCandidate): Promise<Classi
   }
 
   const endpoint = `${watsonxUrl}/ml/v1/text/chat?version=2023-05-29`;
+  const requestBody = JSON.stringify({
+    model_id: model,
+    project_id: projectId,
+    messages: [{ role: "user", content: buildPrompt(candidate) }],
+    max_tokens: 200,
+    temperature: 0,
+  });
 
-  let res: Response;
-  try {
-    res = await globalThis.fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        model_id: model,
-        project_id: projectId,
-        messages: [{ role: "user", content: buildPrompt(candidate) }],
-        max_tokens: 200,
-        temperature: 0,
-      }),
-    });
-  } catch (err) {
-    console.warn("[granite] fetch error:", err);
-    return FALLBACK;
-  }
+  const MAX_ATTEMPTS = 4;
+  const BASE_DELAY_MS = 2_000;
 
-  if (!res.ok) {
-    console.warn(`[granite] HTTP ${res.status} from watsonx`);
+  let res: Response | null = null;
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    try {
+      res = await globalThis.fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: requestBody,
+      });
+    } catch (err) {
+      console.warn("[granite] fetch error:", err);
+      return FALLBACK;
+    }
+
+    // Success — break out of retry loop
+    if (res.ok) break;
+
+    const status = res.status;
+
+    // Retry on 429 (rate limit) and 5xx (server error)
+    if (status === 429 || status >= 500) {
+      const isLastAttempt = attempt === MAX_ATTEMPTS - 1;
+      if (isLastAttempt) {
+        console.warn(
+          `[granite] HTTP ${status} from watsonx — retries exhausted after ${MAX_ATTEMPTS} attempts, falling back`,
+        );
+        return FALLBACK;
+      }
+      const retryAfter = res.headers.get("Retry-After");
+      const waitMs = retryAfter
+        ? parseInt(retryAfter, 10) * 1000
+        : BASE_DELAY_MS * Math.pow(2, attempt); // 2s, 4s, 8s, 16s
+      console.warn(
+        `[granite] HTTP ${status} from watsonx — attempt ${attempt + 1}/${MAX_ATTEMPTS}, retrying in ${waitMs}ms`,
+      );
+      await sleep(waitMs);
+      continue;
+    }
+
+    // Any other non-2xx (4xx except 429) — fail immediately, no retry
+    console.warn(`[granite] HTTP ${status} from watsonx`);
     return FALLBACK;
   }
 
