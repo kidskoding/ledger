@@ -177,10 +177,10 @@ function pickTicks(n: number): number[] {
   return Array.from(ticks).sort((a, b) => a - b);
 }
 
-/** Never rounds — only swaps the ASCII hyphen for a typographic minus. */
+/** Two decimals, with a typographic minus rather than an ASCII hyphen. */
 function formatRho(rho: number): string {
-  const text = String(rho);
-  return text.startsWith("-") ? `−${text.slice(1)}` : text;
+  const text = rho.toFixed(2);
+  return text.startsWith("-") ? `\u2212${text.slice(1)}` : text;
 }
 
 export function CorrelationView({
@@ -217,10 +217,15 @@ export function CorrelationView({
   const axisXn = scalePosition(n, n, PAD.left, INNER_W);
   const axisYn = scalePosition(n, n, PAD.top, INNER_H);
 
-  const isFlat = correlation.rho > RHO_FLAT_THRESHOLD;
-  const finding = isFlat
-    ? "Output rank tells you nothing about who prevents problems."
-    : "The people shipping most are not the people catching most.";
+  // Three readings, because the data can land in three places and each one
+  // is a finding. Reporting the flat sentence over a positive result would
+  // state a conclusion the number does not support.
+  const finding =
+    correlation.rho <= RHO_FLAT_THRESHOLD
+      ? "The people shipping most are not the people catching most."
+      : correlation.rho < -RHO_FLAT_THRESHOLD
+        ? "Output rank tells you nothing about who prevents problems."
+        : "The people shipping most are also the people catching most \u2014 here, reviewing and merging are the same hands.";
 
   return (
     <section className="stack" style={{ gap: "1rem" }}>

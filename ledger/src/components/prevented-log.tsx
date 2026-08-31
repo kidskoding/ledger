@@ -1,9 +1,28 @@
 
 import { useState, type CSSProperties } from "react";
+
+import { SEVERITY_WEIGHT } from "@/lib/ledger/types";
 import type { PreventedEvent, Severity } from "@/lib/ledger/types";
+
+/**
+ * A real repository produces well over a hundred events. Rendering them all
+ * buries the two charts below thousands of pixels down, so the log shows the
+ * highest-blast-radius ones first and keeps the rest one click away.
+ */
+const VISIBLE_BY_DEFAULT = 15;
 
 /** Fixed track widths so the header captions and every data row line up. */
 const COLUMNS = "6rem minmax(220px,1.4fr) minmax(180px,1fr) 8rem 7rem";
+
+/**
+ * Full repository paths run long enough to collide with the columns beside
+ * them. The tail is the part that identifies the code, so keep that and let
+ * the link's title carry the whole path.
+ */
+function shortenPath(path: string): string {
+  const parts = path.split("/");
+  return parts.length <= 2 ? path : `\u2026/${parts.slice(-2).join("/")}`;
+}
 
 /** Every interactive/text cell shares this padding so baselines line up
  * and the button/link cells get a full-height tap target (>=44px). */
@@ -64,9 +83,16 @@ function Row({ event }: { event: PreventedEvent }) {
           target="_blank"
           rel="noreferrer noopener"
           className="mono"
-          style={{ ...CELL, display: "block" }}
+          title={`${event.path}:${event.line}`}
+          style={{
+            ...CELL,
+            display: "block",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
         >
-          {event.path}:{event.line}
+          {shortenPath(event.path)}:{event.line}
         </a>
       </span>
 
@@ -108,8 +134,18 @@ export function PreventedLog({ events }: { events: PreventedEvent[] }) {
     );
   }
 
+  const [showAll, setShowAll] = useState(false);
   const prCount = new Set(events.map((e) => `${e.repo}#${e.prNumber}`)).size;
   const highCount = events.filter((e) => e.severity === "high").length;
+
+  // Severity first, then most recent, so the strongest evidence is on screen
+  // without scrolling.
+  const ranked = [...events].sort(
+    (a, b) =>
+      SEVERITY_WEIGHT[b.severity] - SEVERITY_WEIGHT[a.severity] ||
+      b.createdAt.localeCompare(a.createdAt),
+  );
+  const shown = showAll ? ranked : ranked.slice(0, VISIBLE_BY_DEFAULT);
 
   return (
     <div className="ruled">
@@ -143,12 +179,37 @@ export function PreventedLog({ events }: { events: PreventedEvent[] }) {
           </div>
 
           <div role="presentation" className="rows">
-            {events.map((event) => (
+            {shown.map((event) => (
               <Row key={event.id} event={event} />
             ))}
           </div>
         </div>
       </div>
+
+      {ranked.length > VISIBLE_BY_DEFAULT && (
+        <button
+          type="button"
+          onClick={() => setShowAll((v) => !v)}
+          className="mono"
+          style={{
+            marginTop: "0.9rem",
+            padding: "0.7rem 0",
+            minHeight: "44px",
+            background: "none",
+            border: "none",
+            borderTop: "1px solid var(--rule)",
+            width: "100%",
+            textAlign: "left",
+            color: "var(--ink-muted)",
+            fontSize: "0.8rem",
+            cursor: "pointer",
+          }}
+        >
+          {showAll
+            ? `Show the ${VISIBLE_BY_DEFAULT} highest-severity`
+            : `Show all ${ranked.length}`}
+        </button>
+      )}
     </div>
   );
 }
