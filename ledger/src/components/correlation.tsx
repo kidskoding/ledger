@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Contributor, Correlation } from "@/lib/ledger/types";
 
 /* Coordinate space the chart is authored in, chosen close to the narrowest
@@ -190,12 +191,17 @@ export function CorrelationView({
   contributors: Contributor[];
   correlation: Correlation;
 }) {
+  const [hovered, setHovered] = useState<string | null>(null);
   const n = contributors.length;
   const outputRanks = rankDescending(contributors.map((c) => c.prsMerged));
   const preventedRanks = rankDescending(contributors.map((c) => c.preventedWeighted));
 
   const points = contributors.map((contributor, i) => ({
     login: contributor.login,
+    prsMerged: contributor.prsMerged,
+    preventedEvents: contributor.preventedEvents,
+    outputRank: outputRanks[i],
+    preventedRank: preventedRanks[i],
     cx: scalePosition(outputRanks[i], n, PAD.left, INNER_W),
     cy: scalePosition(preventedRanks[i], n, PAD.top, INNER_H),
     spread: Math.abs(outputRanks[i] - preventedRanks[i]),
@@ -306,7 +312,7 @@ export function CorrelationView({
           y={VIEW_H - 6}
           textAnchor="middle"
         >
-          OUTPUT RANK, PRS MERGED
+          OUTPUT RANK: 1 SHIPS THE MOST
         </text>
         <text
           className="caption"
@@ -315,14 +321,33 @@ export function CorrelationView({
           textAnchor="middle"
           transform={`translate(10, ${PAD.top + INNER_H / 2}) rotate(-90)`}
         >
-          PREVENTED RANK
+          PREVENTED RANK: 1 CATCHES THE MOST
         </text>
 
         {points.map((point) => {
           const label = labelPlacements.get(point.login);
+          const active = hovered === point.login;
           return (
-            <g key={point.login}>
-              <circle cx={point.cx} cy={point.cy} r={DOT_RADIUS} fill="var(--accent)" />
+            <g
+              key={point.login}
+              tabIndex={0}
+              role="button"
+              aria-label={`${point.login}: output rank ${point.outputRank} of ${n}, prevented rank ${point.preventedRank} of ${n}`}
+              onMouseEnter={() => setHovered(point.login)}
+              onMouseLeave={() => setHovered(null)}
+              onFocus={() => setHovered(point.login)}
+              onBlur={() => setHovered(null)}
+              style={{ cursor: "pointer", outline: "none" }}
+            >
+              <title>{`${point.login}: ${point.prsMerged} PRs merged, ${point.preventedEvents} prevented`}</title>
+              {/* Generous invisible target: a 4px dot is hard to hit. */}
+              <circle cx={point.cx} cy={point.cy} r={14} fill="transparent" />
+              <circle
+                cx={point.cx}
+                cy={point.cy}
+                r={active ? DOT_RADIUS + 2.5 : DOT_RADIUS}
+                fill="var(--accent)"
+              />
               {label && (
                 <text
                   className="mono"
@@ -339,6 +364,20 @@ export function CorrelationView({
           );
         })}
       </svg>
+
+      {/* Reserves its line whether or not anything is hovered, so the chart
+          does not jump as the pointer moves across it. */}
+      <p
+        className="mono"
+        aria-live="polite"
+        style={{ fontSize: "0.8rem", color: "var(--ink-muted)", minHeight: "1.4em" }}
+      >
+        {(() => {
+          const p = points.find((x) => x.login === hovered);
+          if (!p) return "Hover a point for that contributor's numbers.";
+          return `${p.login}: ${p.prsMerged} pull ${p.prsMerged === 1 ? "request" : "requests"} merged, ${p.preventedEvents} prevented \u00b7 output rank ${p.outputRank} of ${n}, prevented rank ${p.preventedRank} of ${n}`;
+        })()}
+      </p>
     </section>
   );
 }
