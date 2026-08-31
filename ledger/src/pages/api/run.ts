@@ -1,6 +1,5 @@
 import type { APIRoute } from "astro";
-import { kv } from "@vercel/kv";
-import { allowRun } from "../../lib/ratelimit";
+import { allowRun, getCachedRun, putCachedRun } from "../../lib/ratelimit";
 import { fetchPullRequests } from "../../../lib/ledger/fetch";
 import { detectCandidates } from "../../../lib/ledger/detect";
 import { classify } from "../../../lib/ledger/granite";
@@ -46,7 +45,7 @@ export const GET: APIRoute = ({ url, request }) => {
         }
 
         // A repeat run on the same repository costs no model calls.
-        const cached = await kv.get<RunResult>(`result:${repo}`).catch(() => null);
+        const cached = await getCachedRun<RunResult>(repo);
         if (cached) {
           send({ type: "done", result: cached });
           return;
@@ -132,7 +131,7 @@ export const GET: APIRoute = ({ url, request }) => {
           },
         };
 
-        await kv.set(`result:${repo}`, result, { ex: 604_800 }).catch(() => {});
+        await putCachedRun(repo, result);
         send({ type: "done", result });
       } catch (error) {
         send({

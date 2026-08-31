@@ -1,1 +1,452 @@
-[]
+[
+  {
+    "id": "astral-sh/ruff#28116:3883083539",
+    "repo": "ruff",
+    "commentBody": "Could we check the final class interface here, or defer definitions whose exposed type differs from the raw signature?\n\nThis now reports `invalid-generic-class` for `method`, even though the decorator replaces it with an `int` and there is no consuming method on the class:\n\n```python\nfrom typing import Generic, TypeVar, reveal_type\n\nT_co = TypeVar(\"T_co\", covariant=True)\n\ndef replace(func: object) -> int:\n    return 1\n\nclass C(Generic[T_co]):\n    @replace\n    def method(self, value: T_co) -> None: ...\n\nreveal_type(C[int].method)  # int\n```\n\n`DefinitionInference::function_type` intentionally returns the undecorated function, so passing its raw signature to this check loses the decorator's effect. A method followed by `del method` in the class body also gets the new error despite being absent from the final interface. I think ideally we'd account for which members the class actually exposes before validating their variance.\n\n(But I also think this is probably fine to defer as a TODO, if it's not currently causing ecosystem noise.)",
+    "path": "crates/ty_python_semantic/src/types/infer/builder/post_inference/function.rs",
+    "line": 57,
+    "url": "https://github.com/astral-sh/ruff/pull/28116#discussion_r3883083539",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#28116:3884936191",
+    "repo": "ruff",
+    "commentBody": "Here and everywhere in this PR that there is a test with TODO: we always aim to put a TODO comment _immediately_ on the preceding line at each line where the shown behavior is incorrect. This makes it a lot easier to review PRs that fix the TODO. So there should be a TODO comment right above this line:\n```suggestion\n    # TODO should emit `invalid-generic-class`; `T_co` should be contravariant\n    def method(self, value: T_co) -> int: ...\n```\n\nThis applies to lots of places in this PR, I'm just commenting at this one location, but all should gain a TODO comment.",
+    "path": "crates/ty_python_semantic/resources/mdtest/generics/legacy/variance.md",
+    "line": 484,
+    "url": "https://github.com/astral-sh/ruff/pull/28116#discussion_r3884936191",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#28123:3885178112",
+    "repo": "ruff",
+    "commentBody": "This rejects access to an ordinary `int` attribute that a metaclass initializes on a generic subclass:\n\n```python\nfrom typing import reveal_type\n\nclass Parent[T]:\n    value: T | int\n\nclass Meta(type):\n    def __init__(cls, name: str, bases: tuple[type, ...], namespace: dict[str, object]) -> None:\n        cls.value: int = 1\n\nclass Child[T](Parent[T], metaclass=Meta):\n    pass\n\nreveal_type(Child[str].value)  # int\nChild[str].value = 2\ndel Child[str].value\n```\n\nNormal `class_object_member` lookup gives attributes initialized by the metaclass precedence over inherited declarations, but the raw MRO lookup here sees `Parent.value: T | int`.\n\nCould we use the identity-specialized class-object lookup here and add a generic version of the existing `InitializedDerived.inherited_attr` test?",
+    "path": "crates/ty_python_semantic/src/types.rs",
+    "line": 4860,
+    "url": "https://github.com/astral-sh/ruff/pull/28123#discussion_r3885178112",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#28075:3870403216",
+    "repo": "ruff",
+    "commentBody": "Sorry for being a bit late on picking up on this. I think the implementation you have here makes sense, given how the pytest go-to-definition is defined, but it's inconsistent with how find references and go-to-definition work outside pytest. Reviewing the PRs in isolation never fully consider the LSP experience.\r\n\r\nIf we use this example (https://play.ty.dev/85c8eeb6-b0b5-4f4a-8779-b1928bacda63) without pytest support and search all references of `def resource`, it only returns `def resource` and the `from fixtures import resource as alias`. That makes sense to me, because `alias` is a new and independent definition. Renaming `resource` shouldn't rename `alias`, and the opposite is also true, renaming `alias` shouldn't rename `resource`. \r\n\r\nThe same behavior applies to goto definition. Clicking on `alias` in `print(alias)` jumps to the import statement. This is where the name is defined. You can then jump to resource, which jumps to the `def resource(...)`. \r\n\r\nNow, I can see that pytest fixtures are a bit different, but only if we enforce that `alias` has to point to a proper fixture for go to definition to offer it as a target. And I wonder if this is something we should do in the first place. Let's say you import a name which isn't a fixture and you run your test. Pytest then fails because you forgot to mark the imported symbol as a fixture. It would then be rather annoying if goto definition doesn't work.\r\n\r\nThat's why I think we should actually simplify pytest go to definition by simply implementing Pytest's name lookup. For functions that look like pytest functions, use it's name lookup to find the name in the enclosing scope and jump to it regardless on whether it is a pytest fixture or not. Don't resolve through aliases, matching our normal go to behavior. Clicking on an imported symbol also implements pytest resolution in test files.\r\n\r\nThis then also allows find references to work more like normal find references. And rename should also fit more naturally.\r\n\r\nThis might be worth talking about in person.",
+    "path": "crates/ty_ide/src/find_references.rs",
+    "line": 2636,
+    "url": "https://github.com/astral-sh/ruff/pull/28075#discussion_r3870403216",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#28143:3883741268",
+    "repo": "ruff",
+    "commentBody": "Is there any concern that any other routes can end up back here without preserving the visitor? (In the past, we've used thread locals to guard against that, though it's awful.)",
+    "path": "crates/ty_python_semantic/src/types.rs",
+    "line": 7854,
+    "url": "https://github.com/astral-sh/ruff/pull/28143#discussion_r3883741268",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#28027:3864191524",
+    "repo": "ruff",
+    "commentBody": "Can we reuse the `find_argument_value` call from above? I'm picturing something like:\n\n```rust\nlet path = call.arguments.find_argument_value(\"path\", 0);\n\nif path.is_some_and(|expr| is_file_descriptor(expr, checker.semantic())) {\n    return;\n}\n```\n\nthen your code from above.",
+    "path": "crates/ruff_linter/src/rules/flake8_use_pathlib/rules/replaceable_by_pathlib.rs",
+    "line": 96,
+    "url": "https://github.com/astral-sh/ruff/pull/28027#discussion_r3864191524",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#28001:3853778450",
+    "repo": "ruff",
+    "commentBody": "What are the reasons why we'd fail to read the dependency metadata? I think this should at least be a warning diagnostic. I'd find it important to know when all dependency based rules break because I'm using a too new or old uv version.",
+    "path": "crates/ty_project/src/uv/dependencies.rs",
+    "line": 32,
+    "url": "https://github.com/astral-sh/ruff/pull/28001#discussion_r3853778450",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#28001:3861759634",
+    "repo": "ruff",
+    "commentBody": "I've to read up on what distributions are 😅 \r\n\r\nRegarding deduplication. We don't deduplicate any other import errors. if `indirect` isn't installed, you get two diagnostics for the first example. \r\n\r\n\r\nI think deduplicating also doesn't play nicely with our suppression system. E.g. what if you have\r\n\r\n```py\r\nfrom indirect import foo # ty:ignore[moew-rule]\r\nfrom indirect import bar\r\nimport indirect_helpers\r\n```\r\n\r\nDoes this now suppress all usages of `indirect`? I assume not? But does suppressing it on the first line mean that the diagnostic now moves from the first line to the second:\r\n\r\n```py\r\nfrom indirect import foo # ty:ignore[meow-rule]\r\nfrom indirect import bar\r\n     ^^^^^^^^ meow \r\nimport indirect_helpers\r\n```\r\n\r\nIf that's the case, I think that's confusing for users because adding a suppression can introduce diagnostics in other places in your code. It's also inconsistent to how all other rules behave. So I think we should remove the deduplication (this will be different for when we flag unnecessary declared dependencies, but that's because we report them in a different location)\r\n\r\n\r\nI should probably play with the feature. It's unfortunate that it doesn't work in the playground",
+    "path": "crates/ty_python_semantic/src/types/diagnostic.rs",
+    "line": 1364,
+    "url": "https://github.com/astral-sh/ruff/pull/28001#discussion_r3861759634",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#28001:3862409193",
+    "repo": "ruff",
+    "commentBody": "For the first, I suggest using `assert_matches` or `assert_eq(root.distribution, None)`. It gives you a better error message than `expected true but was false`, instead, it tells you what distribution you got when you expected `None`.\n\nFor the second, use `assert_eq!(&root.dependencies, &[])` assuming it's a slice. If it's a `BTreeSet`, well, that sucks :P",
+    "path": "crates/ty_project/src/uv/dependencies.rs",
+    "line": 460,
+    "url": "https://github.com/astral-sh/ruff/pull/28001#discussion_r3862409193",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#28001:3862590887",
+    "repo": "ruff",
+    "commentBody": "Sure, but why is this needed in a setup call? `files` should be called lazily when first needed",
+    "path": "crates/ty_project/src/metadata.rs",
+    "line": 746,
+    "url": "https://github.com/astral-sh/ruff/pull/28001#discussion_r3862590887",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#28001:3862705397",
+    "repo": "ruff",
+    "commentBody": "What's the motivation for making this distinction? Why would I not want to know about type checking imports that use undeclared dependencies? Or is the idea that this would be a separate, more strict rule?\n\nI'll probably find out later once I start reviewing the implementation. But how does meow handle imports for which ty resolve the stub (default), or does it use our runtime resolution?",
+    "path": "crates/ty_python_semantic/resources/mdtest/import/missing_direct_dependency.md",
+    "line": 179,
+    "url": "https://github.com/astral-sh/ruff/pull/28001#discussion_r3862705397",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#28049:3863357570",
+    "repo": "ruff",
+    "commentBody": "Why do we group by secondary_code_or_id and not by id and only store the secondary code if needed for display?",
+    "path": "crates/ruff/src/printer.rs",
+    "line": 283,
+    "url": "https://github.com/astral-sh/ruff/pull/28049#discussion_r3863357570",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#27877:3860385732",
+    "repo": "ruff",
+    "commentBody": "Uhm, I'm not a Django developer but distinguishing `null` and empty string can be very relevant, depending on what the field stores. Like, you have a questionnaire and some answers are skipped based on previous questions. It could be wrong to fill those fields with an empty string instead of null, if you want to compute some statistics over the provide answers (how many users answered the question, how many of those users wrote a non empty response?). \n\nWhile this is a Django convention, whether this matters is a decision that must be made on a field level and can't be known by Ruff. Suggesting it by default seems ill advised to me. I'd move it to pedantic.",
+    "path": "crates/ruff_linter/src/rules/flake8_django/rules/nullable_model_string_field.rs",
+    "line": 45,
+    "url": "https://github.com/astral-sh/ruff/pull/27877#discussion_r3860385732",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#27877:3860733287",
+    "repo": "ruff",
+    "commentBody": "I think this could be correctness. To me, this is unlikely intentional. ",
+    "path": "crates/ruff_linter/src/rules/pylint/rules/comparison_of_constant.rs",
+    "line": 32,
+    "url": "https://github.com/astral-sh/ruff/pull/27877#discussion_r3860733287",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#27906:3843171822",
+    "repo": "ruff",
+    "commentBody": "```suggestion\n- **Performance**: These rules detect code that can be written in a more efficient way, without changing its semantics or significantly degrading readability.\n```",
+    "path": "docs/linter.md",
+    "line": 164,
+    "url": "https://github.com/astral-sh/ruff/pull/27906#discussion_r3843171822",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#27666:3801691057",
+    "repo": "ruff",
+    "commentBody": "How do protect against spelling mistakes in categories? Should `Category` be an enum? ",
+    "path": "crates/ruff_linter/src/rules/airflow/rules/dag_schedule_argument.rs",
+    "line": 44,
+    "url": "https://github.com/astral-sh/ruff/pull/27666#discussion_r3801691057",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#27666:3801795888",
+    "repo": "ruff",
+    "commentBody": "This seems kind of bad. Now, we don't run this often, but it suggests to me that a `category -> rule` lookup seems desirable. Although, we then have the JSON output that also outputs the category. So not sure, but I think it's worth considering in which direction we want to go here. E.g. testing whether two selectors overlap also requires iterating over all rules.\n\nHow is linter.rules implemented?",
+    "path": "crates/ruff_linter/src/rule_selector.rs",
+    "line": 342,
+    "url": "https://github.com/astral-sh/ruff/pull/27666#discussion_r3801795888",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#27666:3828434183",
+    "repo": "ruff",
+    "commentBody": "Great test. This will become fun when we work on plugins. But it's more likely that this means that plugins need their own namespace",
+    "path": "crates/ruff_linter/src/codes.rs",
+    "line": 1390,
+    "url": "https://github.com/astral-sh/ruff/pull/27666#discussion_r3828434183",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#27666:3843211542",
+    "repo": "ruff",
+    "commentBody": "Instead of disabling, should `Testing` be behind a `cfg` similar to Ruff's test rules?",
+    "path": "crates/ruff_linter/src/codes.rs",
+    "line": 164,
+    "url": "https://github.com/astral-sh/ruff/pull/27666#discussion_r3843211542",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#26880:3863929389",
+    "repo": "ruff",
+    "commentBody": "I think we should we expand aliases when checking whether `base` is fully static. `has_dynamic()` intentionally skips alias bodies, so an alias for `Any` passes this guard.\n\nIn strict narrowing mode, this example returns `Any` and passes on main, but now returns `object` and reports `invalid-return-type`:\n\n```python\nfrom typing import Any, reveal_type\n\ntype Dynamic = Any\n\nclass Co[T]:\n    def get(self) -> T: ...\n\nclass Child[T](Co[T]): ...\n\ndef through_alias(value: Co[Dynamic]) -> str:\n    if isinstance(value, Child):\n        reveal_type(value)  # Child[object]\n        reveal_type(value.get())  # object\n        return value.get()\n    return \"\"\n```\n\nSpelling the argument directly as `Co[Any]` (without the alias) fixes this.\n\nThere are also similar issues with failing to detect dynamic class-based protocol attributes or TypedDict fields. These types can sneak in, even with the restriction to nominal types here, as part of the specialization:\n\n```py\nfrom typing import Any, Protocol\n\nclass Base[T]:\n    def get(self) -> T: ...\n\nclass Child[T](Base[T]): ...\n\nclass Payload(Protocol):\n    value: Any\n\ndef f(x: Base[Payload]) -> int:\n    if isinstance(x, Child):\n        return x.get().value  # errors on this PR but not on main\n    return 0\n```\n\nI think `Type::is_fully_static` may be what you want here to solve these problems, though it will require an audit to ensure that triggering lazy evaluation doesn't cause cycles or performance problems. There's also the more limited `any_over_type_expanding_aliases` which would at least solve the alias problem.",
+    "path": "crates/ty_python_semantic/src/types/set_theoretic/generic_gradual_intersections.rs",
+    "line": 69,
+    "url": "https://github.com/astral-sh/ruff/pull/26880#discussion_r3863929389",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#28080:3866373368",
+    "repo": "ruff",
+    "commentBody": "I think we now need to qualify this link as `super::paths::PathAssignments`, or import the type.",
+    "path": "crates/ty_python_semantic/src/types/constraints/sequents.rs",
+    "line": 24,
+    "url": "https://github.com/astral-sh/ruff/pull/28080#discussion_r3866373368",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#27531:3858571112",
+    "repo": "ruff",
+    "commentBody": "I don't think this example actually exercises the receiver handling described above it. `structural_member_priority` visits the explicit `self: ExplicitReceivers[T_contra]`, sees a protocol, and makes `supports_variance_inference` return false. The class is therefore accepted without running the new variance validation.\r\n\r\nCould we add a negative control that replaces `T_contra` with a covariant type variable throughout this class, so we can tell whether the variance check is actually running? If explicit receivers are intentionally deferred for now, the prose should say that this example exercises the recursion bailout rather than validating their variance.",
+    "path": "crates/ty_python_semantic/resources/mdtest/generics/legacy/variance.md",
+    "line": 499,
+    "url": "https://github.com/astral-sh/ruff/pull/27531#discussion_r3858571112",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#27770:3853513699",
+    "repo": "ruff",
+    "commentBody": "Let's avoid depending on `parsed_module` if there's no definition\n\n```suggestion\n    let definition = end_of_scope_definition(db, file, name)?;\n    let module = parsed_module(db, file.python_file(db)).load(db);\n```",
+    "path": "crates/ty_python_semantic/src/types/dedicated/pytest.rs",
+    "line": 1289,
+    "url": "https://github.com/astral-sh/ruff/pull/27770#discussion_r3853513699",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#27540:3819724384",
+    "repo": "ruff",
+    "commentBody": "Is it important that we support `conftest.py` for non first-party files? Like, do we want to go and resolve `conftest` files in a third-party module? \n\nI'm asking, because the use of `FileRoot` here makes me a bit uneasy :) \n\n`FileRoot`'s are additive only. That means, they're not updated when your project structure changes. The reason for this is that, today, they're only used for a Salsa optimization where updating would be nice, but it doesn't matter much. \n\nHowever, you do rely on FileRoot's being somewhat accurate here. \n\n\nIf we only need to support conftest in first party modules, use `db.project().root()` to get the project's root path. This is also much easier. \n\n\nIf we need to support third party modules. Consider bounding resolution at `search_path` boundaries. That is, use `program.resolver_environment().search_paths()` (maybe in combination with `db.project().root(db))`. Search paths are updated correctly. They're also correct for a specific `Program` (that is, a PEP 723 can have different search paths than the main `Project`).",
+    "path": "crates/ty_python_semantic/src/types/dedicated/pytest.rs",
+    "line": 579,
+    "url": "https://github.com/astral-sh/ruff/pull/27540#discussion_r3819724384",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#27539:3852757577",
+    "repo": "ruff",
+    "commentBody": "Is there a chance that we call` fixture_candidates_from_definition` twice, if we see the same definition more than once. I don't think it's worth skipping those definitions, unless this is more common than I think (assuming it's possible in the first place)",
+    "path": "crates/ty_python_semantic/src/types/dedicated/pytest.rs",
+    "line": 456,
+    "url": "https://github.com/astral-sh/ruff/pull/27539#discussion_r3852757577",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#28029:3854715584",
+    "repo": "ruff",
+    "commentBody": "These ranges don't include grouping parentheses around the boundary elements, so the fix can produce invalid syntax:\n\n```python\nvalue: ((int), str)\n```\n\nThis is rewritten to `value: tuple[int), str]`. Parentheses around the last element have the inverse problem: `(int, (str))` becomes `tuple[int, (str]`. Fix All reports `Applying fixes introduced a syntax error` and reverts the edit in both cases.\n\nCould we preserve the parenthesized element ranges, or only replace the tuple's own delimiters, and add mdtests covering parentheses around both the first and last elements?",
+    "path": "crates/ty_python_semantic/src/types/infer/builder/type_expression.rs",
+    "line": 623,
+    "url": "https://github.com/astral-sh/ruff/pull/28029#discussion_r3854715584",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#27964:3846306477",
+    "repo": "ruff",
+    "commentBody": "This callback's result regresses to `Unknown` in this PR:\n\n```python\nfrom collections.abc import Callable\nfrom typing import reveal_type\n\ntype Items = tuple[int] | tuple[str]\n\ndef identity[T](value: T) -> T:\n    return value\n\ndef extract[T](callback: Callable[[Items], tuple[T]]) -> T:\n    raise NotImplementedError\n\nresult = extract(identity)\nreveal_type(result)\nresult.nonexistent()\n```\n\nMain infers `int | str` and reports `unresolved-attribute`; this PR infers `Unknown` and misses the error.\n\n(Without the type alias, both main and this PR are fine.)\n\nUnioning `Items` with the implicit `Never` implicitly expands the type alias. The `effective_lower.is_union()` guard then returns `CannotSimplify`, so we lose the combined range `Items ≤ V ≤ tuple[T]` (where `V` is `identity`'s fresh type parameter) and the constraints that infer `T`.",
+    "path": "crates/ty_python_semantic/src/types/constraints.rs",
+    "line": 2752,
+    "url": "https://github.com/astral-sh/ruff/pull/27964#discussion_r3846306477",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#27544:3819854852",
+    "repo": "ruff",
+    "commentBody": "The comment here says this branch is for `uv check --script` / standalone scripts, but the condition triggers for any explicit file check path (`system.is_file(path)`), including ordinary modules. Either narrow the condition to only apply to PEP 723 scripts (if feasible) or adjust the comment to reflect the broader behavior (e.g. “any file argument disables uv workspace discovery because it may be a standalone script”).",
+    "path": "crates/ty/src/lib.rs",
+    "line": 153,
+    "url": "https://github.com/astral-sh/ruff/pull/27544#discussion_r3819854852",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#27931:3835217958",
+    "repo": "ruff",
+    "commentBody": "Could we also cover an alias with more than one literal, such as `Alias = Literal[\"a\", \"b\"]`? For `x: \"LiteralString[Alias]\"`, the validator succeeds but returns `Type::Union`, which this predicate rejects. We therefore still don't suggest `Literal`, even though `\"Literal[Alias]\"` is valid.\n\nThis was already missing on the base, so it could be a follow-up, but applying the existing predicate to each union member would make the alias handling work beyond the singleton example.",
+    "path": "crates/ty_python_semantic/src/types/infer/builder/type_expression.rs",
+    "line": 2631,
+    "url": "https://github.com/astral-sh/ruff/pull/27931#discussion_r3835217958",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#27730:3789540206",
+    "repo": "ruff",
+    "commentBody": "this narrowing of a mutable attribute type is unsound and we'll start complaining about it when we add Liskov checking for mutable instance attributes. The behaviour you're asserting is correct, but you could add a TODO now that we should emit a diagnostic here",
+    "path": "crates/ty_python_semantic/resources/mdtest/class/slots.md",
+    "line": 475,
+    "url": "https://github.com/astral-sh/ruff/pull/27730#discussion_r3789540206",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#27730:3789743286",
+    "repo": "ruff",
+    "commentBody": "\"Consistency\" doesn't really make sense as a rationale to me. We usually try to model the runtime behaviour precisely, even when said behaviour is surprising or even buggy, no?\r\n\r\nThis doesn't seem like a priority to me to fix so I wouldn't spend time fixing it, but the prose here makes it sound like this is desirable behaviour and I'm not convinced there.",
+    "path": "crates/ty_python_semantic/resources/mdtest/class/slots.md",
+    "line": 632,
+    "url": "https://github.com/astral-sh/ruff/pull/27730#discussion_r3789743286",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#27730:3789801195",
+    "repo": "ruff",
+    "commentBody": "```suggestion\r\nattributes are not currently modeled. The same limitation applies to slotted subclasses.\r\n```",
+    "path": "crates/ty_python_semantic/resources/mdtest/class/slots.md",
+    "line": 840,
+    "url": "https://github.com/astral-sh/ruff/pull/27730#discussion_r3789801195",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#27730:3823342299",
+    "repo": "ruff",
+    "commentBody": "the edge cases where it would improve our inference are perhaps pretty few and far between, but rather than testing whether each AST element is a string-literal expression, you could possibly test whether the inferred type of each element is a string-literal type. That would allow us to infer precise `__slots__` for something like this:\r\n\r\n```py\r\na = \"foo\"\r\n\r\nclass Bar:\r\n    __slots__ = [a]\r\n```",
+    "path": "crates/ty_python_semantic/src/types/class/slots.rs",
+    "line": 134,
+    "url": "https://github.com/astral-sh/ruff/pull/27730#discussion_r3823342299",
+    "human": null
+  },
+  {
+    "id": "astral-sh/ruff#27897:3832527891",
+    "repo": "ruff",
+    "commentBody": "hmmmmm if we have to special-case random classes like `deque`, then I wonder if an exhaustive `match` wouldn't be better here... does `collections.OrderedDict` not have the same problem? Or is that one okay because it inherits from `dict`, which is already special-cased?",
+    "path": "crates/ty_python_semantic/src/types/class/known.rs",
+    "line": 177,
+    "url": "https://github.com/astral-sh/ruff/pull/27897#discussion_r3832527891",
+    "human": null
+  },
+  {
+    "id": "pandas-dev/pandas#66972:3865920849",
+    "repo": "pandas",
+    "commentBody": "looks like we're only getting startingMonth of 1 or 3.  cant we get to full coverage by adding a 2?",
+    "path": "pandas/tests/tseries/offsets/test_offsets_properties.py",
+    "line": 78,
+    "url": "https://github.com/pandas-dev/pandas/pull/66972#discussion_r3865920849",
+    "human": null
+  },
+  {
+    "id": "pandas-dev/pandas#66836:3829770431",
+    "repo": "pandas",
+    "commentBody": "I think this is also hit with e.g. int/decimal types too. Can you use `pa_type` instead.",
+    "path": "pandas/core/arrays/arrow/array.py",
+    "line": 522,
+    "url": "https://github.com/pandas-dev/pandas/pull/66836#discussion_r3829770431",
+    "human": null
+  },
+  {
+    "id": "pandas-dev/pandas#62242:3828743271",
+    "repo": "pandas",
+    "commentBody": "This doesn't use `self` right? I am fine with keeping it on the class as a helper method, but then maybe make this explicit with marking it as a staticmethod, or otherwise move it as a helper function outside of the class",
+    "path": "pandas/io/parsers/arrow_parser_wrapper.py",
+    "line": 255,
+    "url": "https://github.com/pandas-dev/pandas/pull/62242#discussion_r3828743271",
+    "human": null
+  },
+  {
+    "id": "pandas-dev/pandas#66352:3791842158",
+    "repo": "pandas",
+    "commentBody": "I'm seeing incorrect behavior here, e.g. this raises correctly on main\n\n```python\nleft = pd.DataFrame([[1]], columns=[(\"a\", (1, 2))])\nright = pd.DataFrame([[1]], columns=[(\"a\", range(1, 3))])\npd.testing.assert_frame_equal(left, right)\n```\n\nbecause the name attributes are different, but it does not raise on this PR.\n\nInstead of adding this here, I'd suggest something like the following just above `if not result:` below:\n\n```python\nif (\n        not result\n        and isinstance(left_attr, (tuple, list))\n        and type(left_attr) is type(right_attr)\n    ):\n        # MultiIndex labels (tuples) and Index.names (FrozenList) can contain\n        # NA values that == does not treat as equal\n        result = array_equivalent(\n            np.asarray(left_attr, dtype=object),\n            np.asarray(right_attr, dtype=object),\n            strict_nan=True,\n        )\n```",
+    "path": "pandas/_testing/asserters.py",
+    "line": 530,
+    "url": "https://github.com/pandas-dev/pandas/pull/66352#discussion_r3791842158",
+    "human": null
+  },
+  {
+    "id": "pandas-dev/pandas#66632:3723040985",
+    "repo": "pandas",
+    "commentBody": "cant be None?",
+    "path": "pandas/_testing/_io.py",
+    "line": 61,
+    "url": "https://github.com/pandas-dev/pandas/pull/66632#discussion_r3723040985",
+    "human": null
+  },
+  {
+    "id": "pandas-dev/pandas#66822:3802409600",
+    "repo": "pandas",
+    "commentBody": "```suggestion\n- Bug in :meth:`Series.str.casefold`, :meth:`Series.str.encode`, :meth:`Series.str.findall`, :meth:`Series.str.index`, :meth:`Series.str.normalize`, :meth:`Series.str.partition`, :meth:`Series.str.rfind`, :meth:`Series.str.rindex`, :meth:`Series.str.rpartition`, :meth:`Series.str.translate`, :meth:`Series.str.wrap`, :meth:`Series.str.zfill` and their :class:`Index` counterparts with :class:`ArrowDtype` raising ``ArrowInvalid`` or returning a null dtype when the object was empty, the values were all missing, or the missing values were grouped into a chunk of their own (:issue:`66822`)\n```\n\n?\n\nIs the bug only for ArrowDtype for all those cases? Or also for the pyarrow-backed StringDtype? Because you only added a test for normalize/zfill for the default string (and normalize is new on main)",
+    "path": "doc/source/whatsnew/v3.1.0.rst",
+    "line": 587,
+    "url": "https://github.com/pandas-dev/pandas/pull/66822#discussion_r3802409600",
+    "human": null
+  },
+  {
+    "id": "pandas-dev/pandas#66340:3585151285",
+    "repo": "pandas",
+    "commentBody": "The `kind` docstring text here refers to being applied only when sorting on a single column/label, which is relevant to `sort_values` but not `sort_index`. The implementation routes through `get_indexer_indexer`, which ignores `kind` for MultiIndex axes and when `level` is specified, so the docstring should reflect those actual constraints.",
+    "path": "pandas/core/frame.py",
+    "line": 8768,
+    "url": "https://github.com/pandas-dev/pandas/pull/66340#discussion_r3585151285",
+    "human": null
+  },
+  {
+    "id": "pandas-dev/pandas#66358:3751446950",
+    "repo": "pandas",
+    "commentBody": "i suspect the solution is in `from_arrow` to pass `types_mapper = _arrow_string_types_mapper() if pa_version_under19p0 else None` to `pa_table.to_pandas`",
+    "path": "pandas/tests/frame/test_arrow_interface.py",
+    "line": 77,
+    "url": "https://github.com/pandas-dev/pandas/pull/66358#discussion_r3751446950",
+    "human": null
+  },
+  {
+    "id": "pandas-dev/pandas#65647:3400544600",
+    "repo": "pandas",
+    "commentBody": "I'm a little confused here - why does this xfail pass (meaning the assert raises) on e.g. our Python 3.13 build? \n\nAlso has this been reported to PyArrow?",
+    "path": "pandas/tests/io/test_parquet.py",
+    "line": 1532,
+    "url": "https://github.com/pandas-dev/pandas/pull/65647#discussion_r3400544600",
+    "human": null
+  },
+  {
+    "id": "vercel/next.js#97968:3876720982",
+    "repo": "next",
+    "commentBody": "Change:\n```mdx\nEvery value has to be present while `next build`\nruns, and every value ends up in files that are served to every visitor.\n```\n\nFor:\n```mdx\nValues used by the exported application must be present while `next build`\nruns. Any value inlined or rendered into `out/` is served to every visitor.\n```",
+    "path": "examples/with-docker-export-output/README.md",
+    "line": 194,
+    "url": "https://github.com/vercel/next.js/pull/97968#discussion_r3876720982",
+    "human": null
+  },
+  {
+    "id": "vercel/next.js#95233:3870290378",
+    "repo": "next",
+    "commentBody": "Why isn't this stored as a hash in the manifest already, same as the code hash? We wouldn't want to waste the compute time on each cache function invocation.",
+    "path": "packages/next/src/server/use-cache/use-cache-wrapper.ts",
+    "line": 3659,
+    "url": "https://github.com/vercel/next.js/pull/95233#discussion_r3870290378",
+    "human": null
+  },
+  {
+    "id": "vercel/next.js#97672:3833889235",
+    "repo": "next",
+    "commentBody": "we really wouldn't want this algorithm to select `default` but it could.... \n\n(obviously only with a few thousand exports)\n\nso we would need to treat terms like that act like they are already reserved",
+    "path": "turbopack/crates/turbo-tasks-hash/src/basejs.rs",
+    "line": 56,
+    "url": "https://github.com/vercel/next.js/pull/97672#discussion_r3833889235",
+    "human": null
+  },
+  {
+    "id": "vercel/next.js#97672:3874092850",
+    "repo": "next",
+    "commentBody": "A lot of cloning just so that we do `.as_str()` on the return value again.",
+    "path": "turbopack/crates/turbopack-ecmascript/src/references/esm/export.rs",
+    "line": 716,
+    "url": "https://github.com/vercel/next.js/pull/97672#discussion_r3874092850",
+    "human": null
+  },
+  {
+    "id": "vercel/next.js#97712:3863242634",
+    "repo": "next",
+    "commentBody": "I think we can shrink wrap this section. Right now it reads like a Skill summary, rather than a reference for a reader. \n\nIt is also introduces \"preservation test\" as a concept. \n\nThe snippet below is just a broad suggestion.\n\n```suggestion\n### Preserve existing prefetched UI\n\nAn [`instant()`](/docs/app/guides/instant-navigation#prevent-regressions-with-e2e-tests) test locks in what a navigation shows immediately. With `partialPrefetching` off, write a client-navigation test for each audited link that asserts the UI you chose to preserve, and confirm it passes.\n\nThen adopt the destination and rerun the same test unchanged. A failure names UI the App Shell no longer carries, so you can cache the data or subtree that restores it. A passing test stays as regression coverage.\n```\n\nI am not sure we need the content in 102 and 104  — 102 could go into the API reference for instant. The content in 104, reads like a Skill instruction/pre-condition, more, idk, suddenly it gets very specific. \n",
+    "path": "docs/01-app/02-guides/adopting-partial-prefetching.mdx",
+    "line": 94,
+    "url": "https://github.com/vercel/next.js/pull/97712#discussion_r3863242634",
+    "human": null
+  },
+  {
+    "id": "vercel/next.js#95934:3627701858",
+    "repo": "next",
+    "commentBody": "instead of describing the previous approach simply describe that this is an optimization to reduce redundant rope copies",
+    "path": "turbopack/crates/turbopack-core/src/source_map/structured.rs",
+    "line": 10,
+    "url": "https://github.com/vercel/next.js/pull/95934#discussion_r3627701858",
+    "human": null
+  },
+  {
+    "id": "vercel/next.js#96228:3831158843",
+    "repo": "next",
+    "commentBody": "I'm not seeing what value there is to run a test with an API that doesn't exist. It just throws.",
+    "path": ".agents/skills/gate-tests/SKILL.md",
+    "line": 98,
+    "url": "https://github.com/vercel/next.js/pull/96228#discussion_r3831158843",
+    "human": null
+  }
+]
