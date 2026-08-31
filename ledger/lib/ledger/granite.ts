@@ -139,7 +139,7 @@ const FALLBACK: Classification = {
 export async function classify(candidate: ClassifiableCandidate): Promise<Classification> {
   const watsonxUrl = process.env.WATSONX_URL;
   const projectId = process.env.WATSONX_PROJECT_ID;
-  const model = process.env.WATSONX_MODEL ?? "ibm/granite-13b-instruct-v2";
+  const model = process.env.WATSONX_MODEL ?? "ibm/granite-4-h-small";
 
   if (!watsonxUrl || !projectId) {
     console.warn("[granite] WATSONX_URL or WATSONX_PROJECT_ID not set — returning fallback");
@@ -154,7 +154,7 @@ export async function classify(candidate: ClassifiableCandidate): Promise<Classi
     return FALLBACK;
   }
 
-  const endpoint = `${watsonxUrl}/ml/v1/text/generation?version=2023-05-29`;
+  const endpoint = `${watsonxUrl}/ml/v1/text/chat?version=2023-05-29`;
 
   let res: Response;
   try {
@@ -166,12 +166,10 @@ export async function classify(candidate: ClassifiableCandidate): Promise<Classi
       },
       body: JSON.stringify({
         model_id: model,
-        input: buildPrompt(candidate),
-        parameters: {
-          temperature: 0,
-          max_new_tokens: 200,
-        },
         project_id: projectId,
+        messages: [{ role: "user", content: buildPrompt(candidate) }],
+        max_tokens: 200,
+        temperature: 0,
       }),
     });
   } catch (err) {
@@ -192,12 +190,10 @@ export async function classify(candidate: ClassifiableCandidate): Promise<Classi
     return FALLBACK;
   }
 
-  // watsonx text generation response shape:
-  // { results: [{ generated_text: string }] }
+  // watsonx chat response shape:
+  // { choices: [{ message: { content: string } }] }
   const generated =
-    (body as any)?.results?.[0]?.generated_text ??
-    (body as any)?.generated_text ??
-    "";
+    (body as any)?.choices?.[0]?.message?.content ?? "";
 
   let parsed: unknown;
   try {

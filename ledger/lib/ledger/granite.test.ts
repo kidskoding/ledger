@@ -22,9 +22,9 @@ const IAM_RESPONSE = {
   expires_in: 3600,
 };
 
-function makeWatsonxResponse(generatedText: string, status = 200) {
+function makeWatsonxResponse(content: string, status = 200) {
   return new Response(
-    JSON.stringify({ results: [{ generated_text: generatedText }] }),
+    JSON.stringify({ choices: [{ message: { content } }] }),
     {
       status,
       headers: { "content-type": "application/json" },
