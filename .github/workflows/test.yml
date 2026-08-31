@@ -1,0 +1,30 @@
+name: test
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ledger
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      # The engine's tests stub fetch, so no watsonx or GitHub credentials
+      # are needed here — and none should be, since this runs on every push.
+      - run: bun test lib
+
+      - run: bunx tsc --noEmit
+        continue-on-error: true
+
+      - run: bun run build
