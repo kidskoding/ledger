@@ -8,7 +8,9 @@
     "check": "astro check",
     "cache": "bun scripts/build-cache.ts",
     "validate": "bun scripts/validate.ts",
-    "test": "bun test lib"
+    "test": "bun test lib",
+    "label": "bun scripts/label.ts",
+    "merge-labels": "bun scripts/merge-labels.ts"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.4",
