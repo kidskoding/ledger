@@ -212,5 +212,6 @@ bun scripts/build-cache.ts ruff
 
 ## Team
 
-Anirudh Konidala and Harshini Bondila
+**Anirudh Konidala** and **Harshini Bondila**
+
 IBM SkillsBuild: AI Builders Challenge with IBM Bob Wildcard Challenge, August 2026
