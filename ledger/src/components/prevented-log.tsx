@@ -122,7 +122,7 @@ function Row({ event }: { event: PreventedEvent }) {
           id={detailId}
           style={{ gridColumn: "1 / -1", padding: "0 0 1.1rem" }}
         >
-          <p style={{ marginBottom: "0.6rem" }}>{event.commentBody}</p>
+          <CommentBody text={event.commentBody} />
           <a
             href={event.fixCommitUrl}
             target="_blank"
@@ -132,6 +132,64 @@ function Row({ event }: { event: PreventedEvent }) {
             fixed in {event.fixCommitSha.slice(0, 7)} (+{event.linesChanged})
           </a>
         </div>
+      )}
+    </div>
+  );
+}
+
+/** Sets `backticked spans` in mono so identifiers read as identifiers. */
+function inlineCode(text: string) {
+  return text.split(/`([^`]+)`/).map((chunk, i) =>
+    i % 2 === 1 ? (
+      <code
+        key={i}
+        className="mono"
+        style={{
+          fontSize: "0.85em",
+          background: "var(--paper-sunk)",
+          padding: "0.1em 0.3em",
+          borderRadius: "2px",
+        }}
+      >
+        {chunk}
+      </code>
+    ) : (
+      chunk
+    ),
+  );
+}
+
+/**
+ * Review comments are GitHub-flavoured markdown. Rendering them as plain text
+ * flattens fenced code into an unreadable run-on paragraph, which is exactly
+ * the evidence a reader came to check. This is not a markdown renderer — it
+ * splits on fences, sets code in mono, and keeps the line breaks in prose.
+ */
+function CommentBody({ text }: { text: string }) {
+  const parts = text.split(/```/);
+  return (
+    <div style={{ marginBottom: "0.6rem" }}>
+      {parts.map((part, i) =>
+        i % 2 === 1 ? (
+          <pre
+            key={i}
+            className="mono scroll-x"
+            style={{
+              fontSize: "0.8rem",
+              background: "var(--paper-sunk)",
+              padding: "0.7rem 0.85rem",
+              margin: "0.6rem 0",
+              borderLeft: "2px solid var(--rule-strong)",
+              lineHeight: 1.5,
+            }}
+          >
+            {part.replace(/^\w*\n/, "").trimEnd()}
+          </pre>
+        ) : (
+          <p key={i} style={{ whiteSpace: "pre-wrap", margin: 0 }}>
+            {inlineCode(part.trim())}
+          </p>
+        ),
       )}
     </div>
   );
