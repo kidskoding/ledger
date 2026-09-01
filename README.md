@@ -4,7 +4,7 @@ code review analytics powered by IBM Granite
 
 ai builders challenge via ibm skillsbuild - august challenge ("build intelligent systems for the future of work")
 
-**Live: https://ledger-eight-eta.vercel.app**
+**Live URL in Production: https://ledger-eight-eta.vercel.app**
 
 ---
 
@@ -81,6 +81,25 @@ style nit? A heuristic sees a change request. The model reads the thread and
 sees that someone noticed a retry loop with no jitter would synchronise every
 caller against a rate-limited endpoint.
 
+```mermaid
+flowchart TD
+    A["A reviewer leaves a comment<br/>on specific lines"] --> B{"Did a later commit<br/>change those exact lines?"}
+    B -->|no| X["Not counted.<br/>Talk without consequence."]
+    B -->|yes| C["Deterministic code has now proven<br/>the comment changed the code"]
+    C --> D{"IBM Granite:<br/>a real catch, or a style nit?"}
+    D -->|style nit| X
+    D -->|real catch| E["A prevented event"]
+    E --> F["Ranked by blast radius,<br/>linked to the comment and the commit"]
+    F --> G["Who caught it · The evidence ·<br/>Output against prevention"]
+```
+
+The split is deliberate. **Code proves what happened** — parsing diffs, matching
+line anchors, ranking, correlating — because the value of a number is that it
+can be trusted, and a language model cannot guarantee that. **Granite judges
+what kind of thing it was**, which no heuristic can do: a heuristic sees a
+change request, the model reads the thread and sees that someone caught a retry
+loop with no jitter.
+
 ```
 Browser
   ├── study repos ────→ /api/cached ──→ precomputed JSON
@@ -124,13 +143,13 @@ producing to verifying — and the measurement systems did not follow.
 
 ## How IBM Bob was used
 
-**IBM Bob built the analysis engine** — every file in `ledger/lib/ledger/`
+**IBM Bob built the analysis engine**: every file in `ledger/lib/ledger/`
 except the shared type contract. That is the AI core of the project, not its
 periphery: the GitHub fetch layer, the prevented-event detector, the watsonx
 Granite integration, the keyword baseline used to validate it, severity scoring,
 and review-cycle counting, each with its own test suite. Every one of those
 files was committed from a Bob session; the git history shows which tool wrote
-what.
+what
 
 The working pattern was context first, then implementation, then tests. Each
 prompt opened by telling Bob to read `ARCHITECTURE.md` and the type contract, so
@@ -193,5 +212,5 @@ bun scripts/build-cache.ts ruff
 
 ## Team
 
-Anirudh Konidala · Harshini
-IBM SkillsBuild — AI Builders Challenge with IBM Bob, August 2026
+Anirudh Konidala and Harshini Bondila
+IBM SkillsBuild: AI Builders Challenge with IBM Bob Wildcard Challenge, August 2026
