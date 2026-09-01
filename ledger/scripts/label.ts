@@ -56,7 +56,11 @@ For each review comment, decide what it is:
 Judge the comment on its own. Open the link if you genuinely cannot tell.
 `);
 
-process.stdin.setRawMode(true);
+// Raw mode gives one-keypress answers, but it is unavailable when stdin is
+// not a TTY (running through a package-script wrapper, for instance). Fall
+// back to reading a line so the tool works either way.
+const raw = typeof process.stdin.setRawMode === "function";
+if (raw) process.stdin.setRawMode(true);
 process.stdin.resume();
 process.stdin.setEncoding("utf8");
 
@@ -77,12 +81,13 @@ function show() {
   );
   console.log(r.commentBody.trim().slice(0, 700));
   console.log(`\n${dim(r.url)}`);
-  process.stdout.write(`\n${bold("catch (y) / nit (n) / skip (s) / quit (q)? ")}`);
+  process.stdout.write(
+    `\n${bold("catch (y) / nit (n) / skip (s) / quit (q)")}${raw ? "? " : " then Enter: "}`,
+  );
 }
 
-process.stdin.on("data", (key: string) => {
-  const k = key.toLowerCase();
-  if (k === "" || k === "q") {
+function handle(k: string): void {
+  if (k === "q") {
     save();
     const done = rows.filter((r) => r.human !== null).length;
     console.log(`\n\nSaved ${done} of ${rows.length}. Run the same command to resume.`);
@@ -90,12 +95,19 @@ process.stdin.on("data", (key: string) => {
   }
   if (k === "y") rows[index].human = true;
   else if (k === "n") rows[index].human = false;
-  else if (k === "s") {
-    // Move it to the back rather than marking it, so skips come round again.
-    rows.push(rows.splice(index, 1)[0]);
-  } else return;
+  else if (k === "s") rows.push(rows.splice(index, 1)[0]);
+  else return;
   save();
   show();
+}
+
+process.stdin.on("data", (chunk: string) => {
+  if (chunk.includes("\u0003")) {
+    save();
+    process.exit(0);
+  }
+  // A chunk may carry several answers when input is piped rather than typed.
+  for (const ch of chunk.toLowerCase().replace(/[^ynsq]/g, "")) handle(ch);
 });
 
 show();
