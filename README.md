@@ -24,6 +24,27 @@ Verification work is invisible because its product is an absence — the bug tha
 never shipped, the bad merge that never happened. There is nothing to point at,
 so nothing gets counted.
 
+## Why GitHub doesn't already tell you this
+
+GitHub stores every review comment, every approval, and every commit. It
+measures none of it as review.
+
+Its contributor statistics API — the data behind the Contributors graph — returns
+exactly three numbers per person:
+
+```
+GET /repos/{owner}/{repo}/stats/contributors
+  → { author, total_commits, weeks: [{ a: additions, c: commits, d: deletions }] }
+```
+
+Commits, lines added, lines deleted. Nothing about review. So on the one screen
+you would think to look, the people doing the catching are invisible — they
+appear as low-output contributors.
+
+That gap is the whole reason this project exists, and the correlation LEDGER
+reports is the direct comparison between GitHub's ranking and one that counts
+what was caught.
+
 ## Solution description
 
 Point LEDGER at a repository and it finds **prevented events**: places where a
